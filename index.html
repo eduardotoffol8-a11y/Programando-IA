@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Programação de IA: Do Zero ao Profissional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: #f7f7f9;
+      color: #333;
+      line-height: 1.6;
+    }
+    header {
+      background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+      color: white;
+      padding: 2rem 1rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      margin: 0;
+    }
+    nav {
+      margin-top: 1rem;
+    }
+    nav a {
+      color: #fff;
+      margin: 0 1rem;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+    }
+    .card h2 {
+      font-family: 'Playfair Display', serif;
+      margin-top: 0;
+    }
+    .card img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+    .content {
+      display: none;
+      margin-top: 1rem;
+    }
+    .btn {
+      background: #3f51b5;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      margin-top: 1rem;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #303f9f;
+    }
+    footer {
+      background: #3f51b5;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 3rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Programação de IA: Do Zero ao Profissional</h1>
+    <nav>
+      <a href="#introducao">Introdução</a>
+      <a href="#fundamentos">Fundamentos</a>
+      <a href="#machine">Machine Learning</a>
+      <a href="#aplicacoes">Aplicações</a>
+      <a href="#dicionario">Dicionário</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Capa -->
+    <section class="card">
+      <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=60" alt="Capa Inteligência Artificial">
+      <h2>Bem-vindo</h2>
+      <p>Este é o seu guia completo para mergulhar no universo da Inteligência Artificial, desde os fundamentos até aplicações práticas no mundo real.</p>
+    </section>
+
+    <!-- Sumário -->
+    <section class="card" id="sumario">
+      <h2>Sumário</h2>
+      <p>Confira os principais tópicos abordados neste livro digital:</p>
+      <ul>
+        <li>Introdução à Inteligência Artificial</li>
+        <li>Fundamentos Essenciais</li>
+        <li>Machine Learning</li>
+        <li>Aplicações Empresariais</li>
+        <li>Dicionário de Termos</li>
+      </ul>
+    </section>
+
+    <!-- Introdução -->
+    <section class="card" id="introducao">
+      <img src="https://images.unsplash.com/photo-1581091215367-59ab6c9b8f83?auto=format&fit=crop&w=1200&q=60" alt="Introdução à IA">
+      <h2>Introdução</h2>
+      <p>Desvendando a Inteligência Artificial: conceitos, objetivos e como este livro pode transformar sua jornada.</p>
+      <button class="btn" onclick="toggleContent(this)">Ler mais</button>
+      <div class="content">
+        <h3>O que é Inteligência Artificial?</h3>
+        <p>Campo da ciência da computação que busca criar sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana.</p>
+
+        <h3>A importância da IA no mundo moderno</h3>
+        <p>A IA está em todo lugar — de assistentes virtuais até sistemas avançados de análise de dados. Ela automatiza processos, gera insights e melhora a tomada de decisão.</p>
+
+        <h3>O que você aprenderá</h3>
+        <p>Neste livro, você aprenderá desde a instalação do ambiente Python até a criação de modelos avançados de Machine Learning, além de aplicações práticas em negócios.</p>
+
+        <h3>Preparando-se para a jornada</h3>
+        <p>Tenha em mente que aprender IA é como aprender um novo idioma: exige paciência, prática e curiosidade constante.</p>
+      </div>
+    </section>
