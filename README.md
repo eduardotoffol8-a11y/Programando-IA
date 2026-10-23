@@ -1,5 +1,10 @@
 # DEV FORGE AI | Engenharia de Software + Aplicações de IA
 
+> ## 🧭 Nunca usou GitHub? Comece pelo primeiro dia
+> **[ABRIR O PRIMEIRO DIA (passo a passo, pelo celular ou computador)](CURSO/PRIMEIRO_DIA.md)**. Você aprenderá onde fica a sala de aula, onde é sua mesa de trabalho, como salvar o exercício e como pedir revisão. **Nenhum código ou programa instalado é necessário para começar.**
+>
+> [Mapa da escola e dos ambientes](CURSO/MAPA_DA_ESCOLA.md) · [Como funcionam as experiências profissionais simuladas](CURSO/COMO_FUNCIONA_UMA_ATIVIDADE.md) · [Modelo da primeira entrega](CURSO/templates/MODELO_ENTREGA_001.md)
+
 **Do raciocínio lógico a uma contribuição profissional real em equipes de desenvolvimento.**
 Trilha aberta em português, com inglês técnico incorporado desde a primeira aula.
 
