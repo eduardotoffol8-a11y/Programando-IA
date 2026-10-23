@@ -1,93 +1,53 @@
-# Primeiro dia — aprenda uma ideia antes de mexer nas ferramentas
+# Primeiro dia de trabalho — DEV FORGE Labs (simulação educacional)
 
-**Você não precisa saber programar nem usar GitHub para começar.** Primeiro vamos compreender a lógica, depois aprender a registrar a resposta.
+> **Você não precisa saber programação, inglês técnico ou GitHub.** O mundo da empresa é fictício, mas o que você aprender e construir será trabalho autoral real, com evidências para seu portfólio.
 
-## Parte A — Primeiro, entenda a aula (10–25 min)
+## PARTE 1 — Entre na empresa (sem instalar nada)
 
-1. Abra [a Aula 001: seu primeiro raciocínio de programador](aulas/001-pensamento-computacional.md).
-2. Leia as três regras fictícias da marcenaria.
-3. Veja o exemplo resolvido: largura de 90 cm resulta em 2 portas.
-4. Tente resolver as **três perguntas curtas** da aula:
-   - Quantas portas para 45, 110 e 135 cm?
-   - Com exatamente 120 cm, qual regra se aplica, e por quê?
-   - Se alguém informar 0 cm, o que o sistema deve responder?
-5. **Envie suas respostas no chat com o mentor.** Pode perguntar sobre qualquer trecho que não entendeu. A primeira tentativa é para aprender, não uma prova surpresa.
+1. Abra [o manual da empresa fictícia](EMPRESA_SIMULADA.md). Leia apenas a apresentação do cargo, da equipe e dos personagens.
+2. Abra [DIA 01: seu onboarding](DIA_01_EMPRESA.md).
+3. Leia a conversa com o desenvolvedor sênior Daniel. Ele ensina **entrada → regra → saída** usando um produto de atendimento a clientes chamado SupportPilot.
+4. Veja o exemplo resolvido de cobrança duplicada.
+5. Responda **somente uma pergunta inicial no chat**: para qual equipe encaminhar uma mensagem sobre alguém que trocou de celular e não consegue entrar na conta? Explique sua escolha.
+6. Daniel revisa sua resposta e decide qual pergunta vem depois. Não é uma prova surpresa; pode pedir explicação de qualquer termo.
 
-**A etapa inicial pode terminar aqui.** Não precisa tocar em terminal, instalar programa, criar arquivo nem entender palavras técnicas. Só avance para a Parte B quando a lógica fizer sentido.
+**Você terminou a parte inicial mesmo sem abrir o GitHub.** Assim que estiver confortável, vamos registrar o trabalho.
 
-## Parte B — Como registrar o que aprendeu no GitHub (quando estiver preparado)
+## PARTE 2 — Onde fica o trabalho e como registrar
 
-O GitHub é a plataforma onde o curso e o histórico das atividades ficam guardados. Pense no site como sua escola e seu caderno de desenvolvimento.
+| Lugar | Para que serve |
+|---|---|
+| [Manual da empresa](EMPRESA_SIMULADA.md) | Quem é quem, seu cargo, benefícios fictícios e caminho de crescimento |
+| [Dia 01](DIA_01_EMPRESA.md) | História, conteúdo explicado e a primeira pergunta |
+| [Issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2) | Ticket da primeira tarefa no GitHub |
+| [Modelo de registro](templates/MODELO_DIA_01_EMPRESA.md) | Sua folha de resposta, preenchida após a tentativa |
+| [Progresso](PROGRESSO.md) | O que foi revisado e o próximo passo |
 
-### Passo 1: entre no curso
+### Como salvar a atividade no seu GitHub, quando você estiver pronto
 
-Abra o [repositório Programando-IA](https://github.com/eduardotoffol8-a11y/Programando-IA). Se necessário, faça login. A página com explicações principais é o `README.md`.
+**Proprietário do curso (piloto):**
+1. Faça login em [Programando-IA](https://github.com/eduardotoffol8-a11y/Programando-IA).
+2. Abra a aba **Code**, clique em **Add file → Create new file**. No celular, se o botão não estiver visível, use o navegador no modo “Site para computador”.
+3. Digite no campo do nome: `CURSO/evidencias/eduardo/dia-01-supportpilot.md`.
+4. Copie o [modelo de registro do Dia 01](templates/MODELO_DIA_01_EMPRESA.md) para o editor e preencha suas respostas originais.
+5. Clique em **Commit changes...** para salvar. Essa ação cria um registro datado da mudança.
+6. Copie o link do arquivo, abra a [Issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2), envie o link num comentário e peça revisão ao mentor no chat.
 
-### Passo 2: descubra a diferença entre aula e tarefa
+**Futuros estudantes:** criem seu repositório pessoal em [github.com/new](https://github.com/new) e salvem o registro em `experiencias/dia-01-supportpilot.md`. Não editem o repositório oficial nem publiquem dados privados. O mentor deve receber a URL pessoal da entrega.
 
-- [Aula 001](aulas/001-pensamento-computacional.md): **ensina e dá o exemplo**.
-- [Tarefa #2 (Issue)](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2): **lista o que deve ser entregue e avaliado**.
-- [Modelo de resposta](templates/MODELO_ENTREGA_001.md): **é a folha que você preenche**.
+### O que significa aprovação?
 
-Uma *issue* é apenas uma tarefa registrada. Um arquivo `.md` é um texto comum com formatação simples.
+Um arquivo salvo não prova domínio. O mentor lê, pede explicação, oferece casos inéditos e aprova somente quando a pessoa entendeu. O GitHub não corrige respostas por conta própria.
 
-### Passo 3: salve seu arquivo no GitHub
+## PARTE 3 — Seu futuro posto de trabalho
 
-**No curso piloto do proprietário (Eduardo):**
+- **Agora:** navegador, chat com mentor e registro Markdown; no celular também funciona.
+- **Quando começar Python:** VS Code no notebook/desktop ou Codespaces na nuvem (quando disponível e dentro de cotas); vamos montar tudo juntos.
+- **Depois:** branches, pull requests, testes, APIs, banco de dados, implantação, segurança, LLMs e agentes. Tudo será introduzido dentro dos tickets da empresa, na hora certa.
+- **Carreira:** esses projetos são simulações de trabalho profissional, não emprego real. Portfólio e currículo devem descrever essa diferença.
 
-1. No [repositório](https://github.com/eduardotoffol8-a11y/Programando-IA), abra a aba **Code**.
-2. Clique **Add file → Create new file**. Se o celular não mostrar os botões, experimente o navegador em modo “Site para computador”.
-3. Digite o nome completo do arquivo:
-   
-   `CURSO/evidencias/eduardo/aula-001-resposta.md`
-4. Copie o texto de [MODELO_ENTREGA_001.md](templates/MODELO_ENTREGA_001.md), preencha suas respostas e cole no editor.
-5. Use **Commit changes…** para salvar. A mensagem pode ser `docs: minha primeira atividade de lógica`.
-6. O GitHub abrirá o arquivo; copie o endereço da página. **Esse link comprova o que você entregou.**
+## Se algo não ficar claro
 
-Se quiser corrigir o arquivo, abra-o, clique no lápis **Edit this file** e salve novamente com um commit.
+Diga ao Daniel: **“Não entendi este pedido. Pode me mostrar um exemplo?”**. Isso é uma atitude profissional: perguntar antes de assumir algo errado.
 
-> **Outros alunos:** não editem o repositório oficial. Cada estudante cria seu próprio repositório no GitHub: use [github.com/new](https://github.com/new), dê nome como `minha-jornada-dev-forge-ai`, selecione público ou privado, marque “Add a README” e salve sua resposta em `aulas/aula-001-resposta.md`. O repositório pessoal guarda apenas respostas originais e links, não cópias completas de aulas.
-
-### Passo 4: entregue para avaliação
-
-O aluno piloto pode abrir a [Issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2) e publicar um comentário como:
-
-```text
-Minha resposta da Aula 001 está aqui:
-[cole o link]
-
-Minha principal dúvida:
-[escreva sua pergunta]
-```
-
-Outros alunos enviam o link ao mentor ou ao canal de avaliação indicado pela turma, sem postar suas respostas na issue do proprietário.
-
-**O GitHub não corrige exercícios automaticamente.** O mentor precisa receber a entrega, ler sua solução e propor alguns casos novos para confirmar compreensão.
-
-### Passo 5: acompanhe seu progresso
-
-Depois da revisão, registre o resultado em [PROGRESSO.md](PROGRESSO.md), para o piloto, ou no seu `PROGRESSO.md`, para outros alunos, usando o [modelo de diário](templates/MODELO_PROGRESSO_ALUNO.md).
-
-Aula aberta não é aula concluída. Avance quando conseguir aplicar a regra em um caso novo e explicar sua decisão.
-
-## O que NÃO precisamos fazer agora
-
-- Instalar Python, VS Code ou Docker.
-- Escrever código com pontos e vírgulas.
-- Aprender pseudocódigo técnico.
-- Resolver 14 casos de uma só vez.
-- Escrever uma redação longa em inglês.
-- Entender branches, PRs e revisão de código neste primeiro encontro.
-- Criar aplicativos ou pagar por serviços de IA.
-
-Essas coisas terão sua própria explicação, no momento adequado.
-
-## Se você travar
-
-Diga ao mentor **qual parte não entendeu**: a regra, a pergunta, a resposta ou algum botão do GitHub. O próximo passo deve ser explicar essa dificuldade, não acrescentar exigências.
-
-## Quer conhecer o restante da escola?
-
-- [Mapa dos ambientes](MAPA_DA_ESCOLA.md)
-- [Como funcionam os exercícios e experiências profissionais](COMO_FUNCIONA_UMA_ATIVIDADE.md)
-- [Ferramentas e onde vamos programar futuramente](AMBIENTE.md)
+Para mais detalhes técnicos sobre ferramentas, consulte [AMBIENTE.md](AMBIENTE.md).
