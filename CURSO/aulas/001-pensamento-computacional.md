@@ -1,5 +1,7 @@
 # Aula 001 | De uma intenção a um algoritmo confiável
 
+> **Antes de começar:** este é seu primeiro contato com o curso? Siga [o tutorial do primeiro dia](../PRIMEIRO_DIA.md). Você resolverá esta atividade **em um arquivo escrito**, não no editor de programação. Copie o [modelo de resposta](../templates/MODELO_ENTREGA_001.md), preencha e [entregue conforme o roteiro](../PRIMEIRO_DIA.md#passo-6--entregar-para-revisão). A [issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2) reúne os critérios de avaliação.
+
 **Fase:** 00 · **Duração:** 90–120 minutos · **Modo inicial:** N0 (sem IA para resolver). **Nenhuma linguagem de programação exigida.**
 
 ## Cenário realista
