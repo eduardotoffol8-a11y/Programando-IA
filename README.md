@@ -1,5 +1,13 @@
 # DEV FORGE AI | Engenharia de Software + Aplicações de IA
 
+> ## 🎉 Você foi contratado para a empresa-escola! (simulação)
+> Seu personagem é **Junior AI Application Engineer**, com mentor sênior, equipe fictícia, salário e benefícios simulados, produto realista e tarefas progressivas. **A prática e as evidências são reais; a empresa e o contrato não são.**
+>
+> **[ABRIR O DIA 01 NA EMPRESA](CURSO/DIA_01_EMPRESA.md)** · [Conhecer a DEV FORGE Labs](CURSO/EMPRESA_SIMULADA.md) · [Como registrar o trabalho](CURSO/PRIMEIRO_DIA.md)
+>
+> O antigo exercício de marcenaria permanece como prática opcional dos fundamentos. **A primeira tarefa oficial agora é o SupportPilot.**
+
+
 > ## 🧭 Nunca usou GitHub? Comece pelo primeiro dia
 > **[ABRIR O PRIMEIRO DIA (passo a passo, pelo celular ou computador)](CURSO/PRIMEIRO_DIA.md)**. Você aprenderá onde fica a sala de aula, onde é sua mesa de trabalho, como salvar o exercício e como pedir revisão. **Nenhum código ou programa instalado é necessário para começar.**
 >
