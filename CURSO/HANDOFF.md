@@ -1,5 +1,7 @@
 # Handoff: como continuar o curso em QUALQUER conversa
 
+> **Se o aluno pergunta “onde faço a atividade?”**, leia [PRIMEIRO_DIA.md](PRIMEIRO_DIA.md) e [MAPA_DA_ESCOLA.md](MAPA_DA_ESCOLA.md) antes de avançar. Oriente uma ação concreta por vez: localizar aula → criar arquivo de resposta no espaço autorizado → salvar → entregar link → revisar. Nunca presuma que o aluno sabe GitHub. Futuro aluno usa o próprio repositório; progresso individual não deve ser misturado com o currículo principal.
+
 **Fonte da verdade:** este repositório do GitHub, principalmente `CURSO/ROADMAP.md`, `CURSO/PROGRESSO.md`, `CURSO/METODO.md`, `CURSO/AVALIACAO.md` e a issue ativa. Memória de chat pode não persistir; GitHub é o histórico verificável.
 
 ## Prompt de retomada
