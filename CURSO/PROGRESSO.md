@@ -1,5 +1,7 @@
 # Progresso auditável do aluno
 
+> **Para começar:** [roteiro de primeiro dia](PRIMEIRO_DIA.md). O espaço de trabalho inicial de Eduardo é `CURSO/evidencias/eduardo/aula-001-resposta.md` (criado por ele ao iniciar). Outros alunos usam o [modelo de progresso pessoal](templates/MODELO_PROGRESSO_ALUNO.md) no próprio repositório. Nenhuma entrega ou domínio foi presumido.
+
 **Estado atual: AINDA NÃO INICIADO** — plano de estudos publicado. Nenhuma competência marcada como dominada por antecipação.
 
 - Data de início do curso: a registrar pelo aluno.
