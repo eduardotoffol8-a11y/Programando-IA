@@ -11,10 +11,11 @@
 - Primeira entrega parcial: o aluno encaminhou corretamente ao time de **Acesso** e justificou em inglês; [registro na issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367164201). Não equivale a aprovação da fase.
 - Segundo exercício revisado: o aluno identificou corretamente dois problemas e direcionou aos times Financeiro e Acesso; sugeriu Planos sem evidência suficiente. [Feedback do ticket 002](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367325227). Nenhuma competência formal aprovada ainda.
 - Ticket 003 revisado: aluno propôs **três soluções de triagem** (humana, IA e formulário por categoria), identificou a mesma função central de criação de tickets por departamento. [Evidência e revisão](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367537246). Foram apresentados os trade-offs e a modelagem atendimento-pai + tickets-filhos. **Competência formal ainda não certificada.**
-- Próxima tarefa: como escolher o MVP para duas semanas de prazo e orçamento apertado, explicando custo, risco e experiência do cliente.
-- Última resposta revisada: ticket 001, encaminhamento para equipe Acesso (correto). **Competência formal aprovada: nenhuma por enquanto.**
+- Ticket 004 revisado: o aluno propôs o MVP híbrido de **formulário com seleção múltipla + atendimento humano para exceções**, com um caso principal relacionado a vários tickets por departamento. [Registro e feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367782115). [ADR-001](decisoes/ADR-001-supportpilot-triagem-mvp.md). A estimativa de 99% de cobertura não foi comprovada. Decisão de produto aceita para detalhamento; **nenhuma implementação ou competência formal aprovada**.
+- Próxima tarefa: decidir como comunicar ao cliente um atendimento com dois tickets quando um está resolvido e o outro pendente.
+- Última resposta revisada: ticket 004, decisão de MVP híbrido e relacionamento caso/tickets (adequada com ressalvas). **Competência formal aprovada: nenhuma por enquanto.**
 - Maior bloqueio conhecido: não registrado.
-- Próximo encontro: Daniel apresenta um caso ambíguo no SupportPilot. Registrar respostas e feedback sem presumir domínio.
+- Próximo encontro: Daniel solicita decisão sobre atualizações de status quando o Financeiro resolve e Acesso continua pendente; registrar justificativa e feedback.
 
 ## Quadro de fases
 | Fase | Nome | Status | Evidência |
