@@ -7,10 +7,10 @@
 - Data de início do curso: a registrar pelo aluno.
 - Ritmo escolhido: referência de 12 horas/semana; ajustar depois de 2 semanas.
 - Fase atual: 00 — onboarding e pensamento computacional.
-- Próxima entrega: aula 001 com especificação de regras, tabela de testes, reflexão e explicação em inglês.
+- Próxima entrega: aula 001 simplificada: respostas às larguras 45, 110, 135, 120 e 0 cm, com explicação própria; primeiro no chat e, depois, arquivo no GitHub.
 - Última evidência aprovada: nenhuma.
 - Maior bloqueio conhecido: não registrado.
-- Próximo encontro: abrir a tarefa inicial no GitHub e enviar a solução para revisão.
+- Próximo encontro: ler a [aula 001 simplificada](aulas/001-pensamento-computacional.md), responder às três perguntas no chat e esclarecer dúvidas antes de salvar no GitHub.
 
 ## Quadro de fases
 | Fase | Nome | Status | Evidência |
