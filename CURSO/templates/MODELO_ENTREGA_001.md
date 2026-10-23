@@ -1,94 +1,53 @@
-# Modelo de entrega — Aula 001: lógica das portas
+# Minha resposta — Aula 001 (primeiros passos)
 
-> Copie este modelo para seu **próprio arquivo de resposta**. NÃO é o gabarito. Comece com respostas incompletas e melhore após testar e revisar.
+> **Não é um gabarito.** Copie este modelo para seu arquivo de respostas depois que entender a aula. Se preferir, responda primeiro no chat do mentor; não precisa saber editar o GitHub ainda.
 >
-> Eduardo: `CURSO/evidencias/eduardo/aula-001-resposta.md` no repositório do curso. Outros alunos: `aulas/aula-001-resposta.md` no repositório pessoal.
+> [Voltar à Aula 001 simplificada](../aulas/001-pensamento-computacional.md) • [Passos para salvar no GitHub](../PRIMEIRO_DIA.md)
 
-## Identificação
-- Aula: 001
-- Data:
-- Minha pergunta principal:
-- Ajuda de IA utilizada (N0, N1, N2, N3):
+**Data:**
 
-## 1. O problema em minhas palavras
-**Para quem:**
+## Exercício 1 — Quantas portas?
+Leia a tabela de regras da aula e preencha:
 
-**O que a pessoa precisa:**
+- Largura 45 cm: ___ porta(s)
+- Largura 110 cm: ___ porta(s)
+- Largura 135 cm: ___ porta(s)
 
-**Por que isso importa:**
+## Exercício 2 — Por que essa escolha?
 
-## 2. Entrada, saída e validação
-**Entrada que chega ao sistema:**
+A largura é exatamente 120 cm.
 
-**Saída esperada quando tudo é válido:**
+Eu indicaria ___ portas, porque:
 
-**O que o sistema deve devolver quando a entrada for inválida:**
+___
 
-**Minha lista de regras de validação:**
+## Exercício 3 — Informação inválida
 
-## 3. O algoritmo explicado a um funcionário muito literal
-Escreva instruções numeradas em português comum. Não precisa conhecer nenhuma linguagem de programação.
+Se o cliente informa 0 cm, o sistema deveria:
 
-1. ...
-2. ...
-3. ...
+___
 
-## 4. Minha tabela de previsão
-Preencha a saída esperada e a explicação. **Não consulte gabarito.**
+Porque:
 
-| Entrada | Saída esperada | Por que? |
-|---|---|---|
-| -1 | | |
-| 0 | | |
-| 1 | | |
-| 59,99 | | |
-| 60 | | |
-| 60,01 | | |
-| 119,99 | | |
-| 120 | | |
-| 120,01 | | |
-| 299,99 | | |
-| 300 | | |
-| 300,01 | | |
-| texto "abc" | | |
-| valor vazio | | |
+___
 
-**Os três limites mais importantes e sua explicação:**
+## O que eu aprendi
 
-## 5. Cinco testes novos que eu inventei
-1. Entrada: ...; espero: ...; quero verificar: ...
-2. ...
-3. ...
-4. ...
-5. ...
+Aprendi que um sistema recebe uma **informação**, segue uma **regra** e oferece uma **resposta**. Explique com suas próprias palavras como isso apareceu no exercício:
 
-## 6. O cliente mudou a regra
-> Acima de 240 cm, não sugerir portas: pedir análise humana. Explique o que acontece exatamente em 240 cm.
+___
 
-**Meu entendimento:**
+## Minha dúvida (se houver)
 
-**Quais regras preciso alterar:**
+___
 
-**Como fica o algoritmo após a mudança:**
+## Registro de revisão (preencher depois)
 
-**Quais resultados precisam ser testados novamente:**
-
-## 7. English for developers (60–100 words)
-Explain the input, decision rules, invalid data and one edge case. Write in simple English. You may look up words; explain the logic yourself.
-
-My explanation:
-
-## 8. Reflexão
-**Posso executar todas as instruções e obter um resultado incorreto? Por quê?**
-
-**Qual diferença entre um programa errado e uma regra de negócio errada?**
-
-**O que ainda não compreendo:**
-
-## 9. Entrega e revisão
-- Link do arquivo:
-- Link da issue / comentário:
-- Testes surpresa recebidos:
-- Correções realizadas:
+- Link do meu arquivo:
 - Feedback do mentor:
-- Status: rascunho / entregue / em revisão / aprovado (apenas após confirmação)
+- O que corrigi ou melhorei:
+- Status: **rascunho** (só marcar **aprovado** depois da avaliação).
+
+---
+
+**Não é preciso:** código Python, pseudocódigo, 14 testes, mudanças de requisitos ou redação longa em inglês nesta etapa. Eles aparecem mais adiante, quando forem ensinados.
