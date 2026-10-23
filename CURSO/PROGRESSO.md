@@ -10,7 +10,8 @@
 - Nova ambientação: contratado fictício como Junior AI Application Engineer na [DEV FORGE Labs](EMPRESA_SIMULADA.md), com Daniel Martins como mentor simulado. Salário e benefícios fazem parte do jogo, não de emprego real.
 - Primeira entrega parcial: o aluno encaminhou corretamente ao time de **Acesso** e justificou em inglês; [registro na issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367164201). Não equivale a aprovação da fase.
 - Segundo exercício revisado: o aluno identificou corretamente dois problemas e direcionou aos times Financeiro e Acesso; sugeriu Planos sem evidência suficiente. [Feedback do ticket 002](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367325227). Nenhuma competência formal aprovada ainda.
-- Próxima tarefa: pensar como representar uma mensagem com dois problemas quando cada ticket admite somente uma equipe; responder uma pergunta por vez, sem código.
+- Ticket 003 revisado: aluno propôs **três soluções de triagem** (humana, IA e formulário por categoria), identificou a mesma função central de criação de tickets por departamento. [Evidência e revisão](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367537246). Foram apresentados os trade-offs e a modelagem atendimento-pai + tickets-filhos. **Competência formal ainda não certificada.**
+- Próxima tarefa: como escolher o MVP para duas semanas de prazo e orçamento apertado, explicando custo, risco e experiência do cliente.
 - Última resposta revisada: ticket 001, encaminhamento para equipe Acesso (correto). **Competência formal aprovada: nenhuma por enquanto.**
 - Maior bloqueio conhecido: não registrado.
 - Próximo encontro: Daniel apresenta um caso ambíguo no SupportPilot. Registrar respostas e feedback sem presumir domínio.
