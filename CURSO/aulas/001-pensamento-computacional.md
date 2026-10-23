@@ -1,5 +1,7 @@
 # Aula 001 — Seu primeiro raciocínio de programador
 
+> **Nova apresentação principal do curso:** [Dia 01 como Junior AI Application Engineer](../DIA_01_EMPRESA.md). Este exercício de marcenaria continua disponível como **prática complementar** da mesma lógica (informação → regra → resultado), para quem desejar outro exemplo. Não é a tarefa inicial obrigatória do onboarding.
+
 **Nível:** iniciante absoluto • **Tempo sugerido:** 15–25 minutos • **Precisa saber programar? NÃO.** • **Ferramenta:** este texto e uma resposta em português.
 
 > **Comece por aqui.** Você não precisa entender GitHub, inglês técnico, testes automáticos ou comandos para fazer esta atividade. **Pode responder diretamente ao seu mentor no chat.** Quando entendermos juntos, você poderá guardar sua resposta no GitHub usando [este modelo simples](../templates/MODELO_ENTREGA_001.md). O [guia do primeiro dia](../PRIMEIRO_DIA.md) explica os cliques.
