@@ -57,8 +57,32 @@ Os requisitos ainda precisam ser refinados e aprovados. Não afirmar que o siste
 - Introdução a **eventos, prazos, alertas, observabilidade e regras de negócio**.
 - Consideração futura de automação idempotente, autorização e escalonamento.
 
+## Atualização — Central de alertas (Ticket 007)
+
+O aluno propôs uma página interna com três grupos:
+
+| Lista | O que significa |
+|---|---|
+| **Abertos** | Alertas ainda não assumidos, ordenados por prioridade e tempo |
+| **Em andamento** | Um membro da equipe está investigando a ocorrência |
+| **Concluídos** | Investigação interna encerrada com resultado documentado |
+
+**Regra de unicidade proposta:** para uma mesma ocorrência de atraso de um ticket, abrir um único alerta de QA. Quando o monitor executar novamente, consultar o registro existente e, se houver um, **não criar nem reiniciar outro alerta**. A regra deve ser garantida no backend/banco, inclusive sob execução simultânea, e não apenas na tela.
+
+**Diferença entre estados:** ticket do cliente e alerta de QA são entidades separadas; concluir revisão interna não significa necessariamente que o problema do cliente foi resolvido.
+
+**Questões futuras:** decidir se um novo atraso depois de resolução e reabertura representa nova ocorrência e, portanto, pode gerar um novo alerta; determinar responsável, histórico, prioridades e acesso autorizado.
+
+**Critérios verificáveis futuros:**
+- O mesmo ticket e a mesma ocorrência de atraso, monitorados duas vezes, não criam dois alertas.
+- O alerta em andamento continua em andamento após nova verificação.
+- Uma ocorrência nova e legítima não fica invisível por conta de alerta antigo já concluído.
+- A ordenação considera prioridades definidas e tempo sem atualização conforme política aprovada.
+
+[Registro do Ticket 007](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6368187865).
+
 ## Próxima atividade
 
-Antes de codificar, perguntar ao aluno: **“Se o sistema verificar o mesmo ticket atrasado de hora em hora, o que deve fazer para não criar dezenas de alertas iguais?”**. O conceito de idempotência deve ser ensinado de modo simples após a tentativa.
+**Agora vamos sair do desenho da página e escrever a primeira regra executável em palavras.** O aluno deve explicar em três etapas: o que verificar ao detectar um ticket atrasado, quando criar e quando manter o alerta. Depois veremos um pequeno exemplo de código. O conceito de idempotência foi apresentado, mas ainda não demonstrado por código/teste.
 
 Relato do aluno registrado na [Issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2).
