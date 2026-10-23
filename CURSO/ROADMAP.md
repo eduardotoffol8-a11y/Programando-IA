@@ -1,5 +1,7 @@
 # Roadmap completo: 72 semanas, cerca de 864 horas
 
+> **História que dá unidade ao currículo:** o aluno entra na empresa fictícia [DEV FORGE Labs](EMPRESA_SIMULADA.md) como Junior AI Application Engineer, acompanha um desenvolvedor sênior e ganha responsabilidades conforme demonstra competências reais. Primeiro expediente: [SupportPilot](DIA_01_EMPRESA.md). Os demais projetos são diferentes contratos e produtos do mesmo laboratório; o roadmap técnico continua válido. Salário e benefícios são somente elementos da simulação.
+
 **Este calendário é uma hipótese de planejamento.** As fases avançam por evidência, não por data. Uma pessoa pode levar menos ou mais de 72 semanas. A cada fase existe programa semanal, projeto e gate.
 
 | Fase | Semanas | Enfoque | Entrega/gate |
