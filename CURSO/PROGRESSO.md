@@ -15,10 +15,11 @@
 - Ticket 005 revisado: propôs **avisar imediatamente a resolução financeira e informar que o login continua em andamento**. Ajuste: comunicar previsão de 48 horas, nunca garantia de liberação. Estados exemplificados: Financeiro resolvido; Acesso em andamento; atendimento principal parcialmente resolvido. [Registro de feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367858039). Não houve implementação nem competência formal certificada.
 - Ticket 006 revisado: aluno propôs **comunicação proativa ao cliente** e **alerta interno de QA após 72h** para estudar atrasos de suporte. Feedback: aviso inicial aos 48h estimados vencidos; alerta interno adicional de 72h; não duplicar tickets, respeitar estados separados. [Registro e feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367986216) e [especificação de requisitos](requisitos/SUPPORTPILOT-ALERTAS.md). Nenhum software implementado ou testado.
 - Ticket 007 revisado: aluno propôs **central de alertas por estados (Abertos, Em andamento, Concluídos)**, com ordenação por prioridade/tempo e um alerta por ocorrência. Introduzida a distinção entre interface e regra de unicidade no backend; [feedback na issue](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6368187865); [requisitos atualizados](requisitos/SUPPORTPILOT-ALERTAS.md). Ainda não há código nem testes.
-- Próxima tarefa: escrever a lógica para impedir duplicações em três passos, na linguagem comum, preparando a primeira implementação.
-- Última resposta revisada: ticket 007, central de alertas e controle de duplicatas (boa modelagem de workflow; garantia técnica ainda não demonstrada). **Competência formal aprovada: nenhuma por enquanto.**
+- Ticket 008 revisado: primeira previsão de comportamento Python com `if ticket_atrasado and not alerta_existente`. Aluno respondeu que imprimiria “tickets already existent”; mentor explicou que o bloco **não imprime nada** com alerta existente e introduziu `else`. [Revisão do primeiro código](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6368309656). Ainda precisa demonstrar compreensão com nova previsão, sem aprovação formal.
+- Próxima tarefa: interpretar `if/else` com ticket **não atrasado** e **sem alerta**, verificando por que o `else` genérico engana.
+- Última resposta revisada: ticket 008, primeira leitura de condição Python; saída prevista não correspondia ao código, erro explicado. **Competência formal aprovada: nenhuma por enquanto.**
 - Maior bloqueio conhecido: não registrado.
-- Próximo encontro: Daniel orienta a escrita de uma regra simples de verificação/criação/manutenção, preparando o primeiro código Python e seu teste.
+- Próximo encontro: Daniel verifica a compreensão de `if/else` com um segundo cenário de valores, antes de ampliar o código.
 
 ## Quadro de fases
 | Fase | Nome | Status | Evidência |
