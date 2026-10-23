@@ -1,5 +1,10 @@
 # Comece aqui: contrato de aprendizagem
 
+> ## Quero começar agora, mas não sei onde clicar
+> **[PRIMEIRO DIA: tutorial completo para iniciantes](PRIMEIRO_DIA.md)** → [Mapa da escola](MAPA_DA_ESCOLA.md) → [Experiências profissionais explicadas](COMO_FUNCIONA_UMA_ATIVIDADE.md) → [Modelo de resposta da Aula 001](templates/MODELO_ENTREGA_001.md).
+>
+> **Resposta curta:** a **aula** fica em `CURSO/aulas/`; a **tarefa** fica em uma issue; seu **trabalho** fica em um arquivo seu; a **revisão** acontece após enviar o link; seu **progresso** é atualizado somente depois da aprovação. [Veja o passo a passo com cliques reais](PRIMEIRO_DIA.md).
+
 ## Destino
 Formar alguém capaz de trabalhar numa equipe de software e, posteriormente, desenvolver aplicações profissionais que utilizem modelos de linguagem e agentes de IA. O objetivo não é ser "operador de prompts"; é compreender decisões, custos, qualidade, arquitetura, limites e manutenção.
 
