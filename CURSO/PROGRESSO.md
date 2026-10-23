@@ -12,10 +12,11 @@
 - Segundo exercício revisado: o aluno identificou corretamente dois problemas e direcionou aos times Financeiro e Acesso; sugeriu Planos sem evidência suficiente. [Feedback do ticket 002](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367325227). Nenhuma competência formal aprovada ainda.
 - Ticket 003 revisado: aluno propôs **três soluções de triagem** (humana, IA e formulário por categoria), identificou a mesma função central de criação de tickets por departamento. [Evidência e revisão](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367537246). Foram apresentados os trade-offs e a modelagem atendimento-pai + tickets-filhos. **Competência formal ainda não certificada.**
 - Ticket 004 revisado: o aluno propôs o MVP híbrido de **formulário com seleção múltipla + atendimento humano para exceções**, com um caso principal relacionado a vários tickets por departamento. [Registro e feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367782115). [ADR-001](decisoes/ADR-001-supportpilot-triagem-mvp.md). A estimativa de 99% de cobertura não foi comprovada. Decisão de produto aceita para detalhamento; **nenhuma implementação ou competência formal aprovada**.
-- Próxima tarefa: decidir como comunicar ao cliente um atendimento com dois tickets quando um está resolvido e o outro pendente.
-- Última resposta revisada: ticket 004, decisão de MVP híbrido e relacionamento caso/tickets (adequada com ressalvas). **Competência formal aprovada: nenhuma por enquanto.**
+- Ticket 005 revisado: propôs **avisar imediatamente a resolução financeira e informar que o login continua em andamento**. Ajuste: comunicar previsão de 48 horas, nunca garantia de liberação. Estados exemplificados: Financeiro resolvido; Acesso em andamento; atendimento principal parcialmente resolvido. [Registro de feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367858039). Não houve implementação nem competência formal certificada.
+- Próxima tarefa: decidir como comunicar e proceder se o prazo estimado para resolver acesso expirar.
+- Última resposta revisada: ticket 005, comunicação de status parcial (adequada com ressalva sobre a promessa de 48h). **Competência formal aprovada: nenhuma por enquanto.**
 - Maior bloqueio conhecido: não registrado.
-- Próximo encontro: Daniel solicita decisão sobre atualizações de status quando o Financeiro resolve e Acesso continua pendente; registrar justificativa e feedback.
+- Próximo encontro: Daniel pergunta o que fazer quando a previsão de 48h não é cumprida; explicar comportamento, aviso ao cliente e escalonamento.
 
 ## Quadro de fases
 | Fase | Nome | Status | Evidência |
