@@ -13,10 +13,11 @@
 - Ticket 003 revisado: aluno propôs **três soluções de triagem** (humana, IA e formulário por categoria), identificou a mesma função central de criação de tickets por departamento. [Evidência e revisão](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367537246). Foram apresentados os trade-offs e a modelagem atendimento-pai + tickets-filhos. **Competência formal ainda não certificada.**
 - Ticket 004 revisado: o aluno propôs o MVP híbrido de **formulário com seleção múltipla + atendimento humano para exceções**, com um caso principal relacionado a vários tickets por departamento. [Registro e feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367782115). [ADR-001](decisoes/ADR-001-supportpilot-triagem-mvp.md). A estimativa de 99% de cobertura não foi comprovada. Decisão de produto aceita para detalhamento; **nenhuma implementação ou competência formal aprovada**.
 - Ticket 005 revisado: propôs **avisar imediatamente a resolução financeira e informar que o login continua em andamento**. Ajuste: comunicar previsão de 48 horas, nunca garantia de liberação. Estados exemplificados: Financeiro resolvido; Acesso em andamento; atendimento principal parcialmente resolvido. [Registro de feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367858039). Não houve implementação nem competência formal certificada.
-- Próxima tarefa: decidir como comunicar e proceder se o prazo estimado para resolver acesso expirar.
-- Última resposta revisada: ticket 005, comunicação de status parcial (adequada com ressalva sobre a promessa de 48h). **Competência formal aprovada: nenhuma por enquanto.**
+- Ticket 006 revisado: aluno propôs **comunicação proativa ao cliente** e **alerta interno de QA após 72h** para estudar atrasos de suporte. Feedback: aviso inicial aos 48h estimados vencidos; alerta interno adicional de 72h; não duplicar tickets, respeitar estados separados. [Registro e feedback](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367986216) e [especificação de requisitos](requisitos/SUPPORTPILOT-ALERTAS.md). Nenhum software implementado ou testado.
+- Próxima tarefa: explicar como impedir que o monitoramento periódico gere alertas de QA duplicados para o mesmo atraso.
+- Última resposta revisada: ticket 006, alerta de QA e comunicação em atraso (boa análise com ressalvas técnicas). **Competência formal aprovada: nenhuma por enquanto.**
 - Maior bloqueio conhecido: não registrado.
-- Próximo encontro: Daniel pergunta o que fazer quando a previsão de 48h não é cumprida; explicar comportamento, aviso ao cliente e escalonamento.
+- Próximo encontro: Daniel demonstra o perigo de verificações periódicas repetidas e pergunta como garantir apenas um alerta interno por ticket atrasado; conceito de idempotência em linguagem comum.
 
 ## Quadro de fases
 | Fase | Nome | Status | Evidência |
