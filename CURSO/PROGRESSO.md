@@ -2,21 +2,22 @@
 
 > **Para começar:** [roteiro de primeiro dia](PRIMEIRO_DIA.md). O espaço de trabalho inicial de Eduardo é `CURSO/evidencias/eduardo/aula-001-resposta.md` (criado por ele ao iniciar). Outros alunos usam o [modelo de progresso pessoal](templates/MODELO_PROGRESSO_ALUNO.md) no próprio repositório. Nenhuma entrega ou domínio foi presumido. Salário e contratação são ficção educacional.
 
-**Estado atual: AINDA NÃO INICIADO** — plano de estudos publicado. Nenhuma competência marcada como dominada por antecipação.
+**Estado atual: EM ANDAMENTO** — Dia 01 iniciado em 23/10/2026. A primeira decisão foi correta, mas nenhuma competência de fase foi certificada por antecipação.
 
-- Data de início do curso: a registrar pelo aluno.
+- Data de início do curso: 23/10/2026 (primeira resposta ao ticket SupportPilot).
 - Ritmo escolhido: referência de 12 horas/semana; ajustar depois de 2 semanas.
 - Fase atual: 00 — onboarding na empresa fictícia e pensamento computacional.
 - Nova ambientação: contratado fictício como Junior AI Application Engineer na [DEV FORGE Labs](EMPRESA_SIMULADA.md), com Daniel Martins como mentor simulado. Salário e benefícios fazem parte do jogo, não de emprego real.
-- Próxima entrega: [Dia 01 — SupportPilot](DIA_01_EMPRESA.md), explicar o encaminhamento de mensagem de cliente. Uma pergunta por vez, primeiro no chat, depois no GitHub.
-- Última evidência aprovada: nenhuma.
+- Primeira entrega parcial: o aluno encaminhou corretamente ao time de **Acesso** e justificou em inglês; [registro na issue #2](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367164201). Não equivale a aprovação da fase.
+- Próxima tarefa: analisar uma mensagem de cliente que misture cobrança e dificuldade de login; responder no chat com justificativa.
+- Última resposta revisada: ticket 001, encaminhamento para equipe Acesso (correto). **Competência formal aprovada: nenhuma por enquanto.**
 - Maior bloqueio conhecido: não registrado.
-- Próximo encontro: Daniel apresenta a primeira mensagem realista do cliente no [Dia 01](DIA_01_EMPRESA.md). Depois da resposta e feedback, registrar em `CURSO/evidencias/eduardo/dia-01-supportpilot.md`.
+- Próximo encontro: Daniel apresenta um caso ambíguo no SupportPilot. Registrar respostas e feedback sem presumir domínio.
 
 ## Quadro de fases
 | Fase | Nome | Status | Evidência |
 |---|---|---|---|
-| 00 | Pensamento computacional | A iniciar | — |
+| 00 | Pensamento computacional | Em andamento | [Ticket 001 revisado](https://github.com/eduardotoffol8-a11y/Programando-IA/issues/2#issuecomment-6367164201); fase ainda não aprovada |
 | 01 | Programação Python e algoritmos | Bloqueada | — |
 | 02 | Estruturas de dados, CS e Git | Bloqueada | — |
 | 03 | Web, JavaScript e TypeScript | Bloqueada | — |
