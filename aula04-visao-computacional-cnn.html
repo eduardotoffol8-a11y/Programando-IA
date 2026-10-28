@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 4 — Como a IA Enxerga Imagens (Visão Computacional & CNNs)</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--a:#38bdf8;--b:#f472b6;--y:#facc15;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--txt)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:10;border-bottom:1px solid #2a3050}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  main{max-width:1040px;margin:auto;padding:20px}
+  .card{background:var(--card);border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 4px 20px #0005}
+  .mission{border-left:5px solid var(--acc)}
+  .mission.done{border-left-color:var(--ok)}
+  .mission h3{margin:0 0 8px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;background:#2a3050;font-size:.8rem;margin-left:6px}
+  button{background:var(--acc);color:#fff;border:0;padding:10px 16px;border-radius:10px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0;font-weight:600}
+  button:hover{filter:brightness(1.15)}
+  button.sec{background:#2a3050}
+  .row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .tip{background:#22284a;padding:12px 16px;border-radius:10px;margin-top:12px;font-size:.95rem;line-height:1.5}
+  .hidden{display:none}
+  .stat{font-size:1.8rem;font-weight:700}
+  .mono{font-family:Consolas,monospace;background:#0b0e1a;padding:12px;border-radius:10px;line-height:1.6;font-size:.9rem}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:12px 22px;border-radius:12px;font-weight:700;transition:transform .4s;z-index:99}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .grid-pixel{display:grid;gap:2px;background:#0b0e1a;padding:6px;border-radius:10px}
+  .pixel-cell{width:36px;height:36px;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold;user-select:none;transition:background .15s}
+  .quiz button{display:block;width:100%;text-align:left;background:#2a3050;margin-bottom:8px}
+  .quiz button.right{background:var(--ok);color:#052e16}
+  .quiz button.wrong{background:#ef4444}
+</style>
+</head>
+<body>
+<header>
+  <b>👁️ Academia IA — Aula 4: Visão Computacional & CNNs</b>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="lvl">Nível 1</span>
+    <div class="xpbar"><div class="xpfill" id="xp"></div></div>
+    <span id="xpt">0 XP</span>
+  </div>
+</header>
+<main>
+
+<div class="card">
+  <h2>Como a IA Enxerga o Mundo? ⏱️ 12 min</h2>
+  <p>Para você, uma foto de gato tem orelhas e olhos. <b>Para o computador, imagens são apenas tabelas de números de 0 a 255.</b><br>
+  Nesta aula você vai descobrir como as <b>Redes Neurais Convolucionais (CNNs)</b> transformam números em reconhecimento de imagens em carros autônomos, raio-X e no Face ID!</p>
+</div>
+
+<!-- MISSÃO 1 -->
+<div class="card mission" id="m1">
+  <h3>🎨 Missão 1 — O Raio-X dos Pixels <span class="badge">+30 XP</span></h3>
+  <p>Clique ou arraste nas células para pintar. Repare como a <b>matriz numérica</b> ao lado muda instantaneamente:</p>
+  <div class="row">
+    <div>
+      <div style="margin-bottom:8px">
+        <button id="clrGrid" class="sec">🗑️ Limpar</button>
+        <button id="presetCross" class="sec">➕ Desenhar Cruz</button>
+        <button id="presetCircle" class="sec">⭕ Desenhar Círculo</button>
+      </div>
+      <div class="grid-pixel" id="pixelGrid" style="grid-template-columns:repeat(8, 36px)"></div>
+    </div>
+    <div style="flex:1;min-width:280px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <b>Matriz que a IA "lê" (0 a 255):</b>
+        <span id="pixelsLit" style="color:var(--y)">0 acesos</span>
+      </div>
+      <div class="mono" id="matrixView" style="height:280px;overflow-y:auto;white-space:pre"></div>
+      <div class="tip">💡 <b>0</b> = Preto total (sem luz) · <b>255</b> = Branco máximo · Valores intermediários são tons de cinza. Em fotos coloridas, temos 3 matrizes sobrepostas: <b>R (Vermelho), G (Verde), B (Azul)</b>!</div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 2 -->
+<div class="card mission hidden" id="m2">
+  <h3>🔍 Missão 2 — A "Lupa Mágica": Filtros de Convolução <span class="badge">+35 XP</span></h3>
+  <p>Em vez de olhar pixel por pixel solto, a IA passa uma <b>lupa 3x3 (Filtro Convolucional)</b> para detectar características (bordas, curvas, texturas).<br>
+  Escolha um filtro e passe a lupa sobre a imagem:</p>
+  <div style="margin-bottom:12px">
+    <button id="fEdgeH" class="sec">➖ Detectar Bordas Horizontais</button>
+    <button id="fEdgeV" class="sec">| Detectar Bordas Verticais</button>
+    <button id="fSharpen" class="sec">✨ Filtro de Nitidez</button>
+  </div>
+  <div class="row">
+    <div>
+      <div style="font-weight:bold;margin-bottom:6px">Imagem Original + Lupa 3x3</div>
+      <canvas id="convInput" width="240" height="240" style="background:#0b0e1a;border-radius:10px"></canvas>
+    </div>
+    <div style="align-self:center;font-size:2rem">➡️</div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:6px">Filtro Aplicado (Kernel 3x3)</div>
+      <div class="mono" id="kernelBox" style="width:180px;text-align:center"></div>
+    </div>
+    <div style="align-self:center;font-size:2rem">➡️</div>
+    <div>
+      <div style="font-weight:bold;margin-bottom:6px">Mapa de Características Resultante</div>
+      <canvas id="convOutput" width="240" height="240" style="background:#0b0e1a;border-radius:10px"></canvas>
+    </div>
+  </div>
+  <button id="autoScan" style="margin-top:12px">▶️ Escanear Imagem Inteira Automaticamente</button>
+  <div class="tip">💡 <b>A mágica:</b> A IA não precisa que um humano programe a lupa! Ela <i>aprende</i> os números desse filtro 3x3 sozinha durante o treinamento para achar olhos, narizes e rodas.</div>
+</div>
+
+<!-- MISSÃO 3 -->
+<div class="card mission hidden" id="m3">
+  <h3>📦 Missão 3 — Max Pooling (O Resumo Inteligente) <span class="badge">+25 XP</span></h3>
+  <p>Imagens em alta definição têm milhões de pixels. Para a IA não ficar lenta, ela usa o <b>Max Pooling</b>: divide em blocos 2x2 e guarda apenas o <b>maior número</b> de cada bloco.</p>
+  <div class="row">
+    <div style="flex:1;min-width:260px">
+      <b>Bloco 4x4 original:</b>
+      <div class="grid-pixel" id="poolIn" style="grid-template-columns:repeat(4, 52px);margin-top:8px"></div>
+    </div>
+    <div style="align-self:center;font-size:2rem">➡️</div>
+    <div style="flex:1;min-width:260px">
+      <b>Após Max Pooling 2x2 (Tamanho reduzido pela metade!):</b>
+      <div class="grid-pixel" id="poolOut" style="grid-template-columns:repeat(2, 60px);margin-top:8px"></div>
+    </div>
+  </div>
+  <div class="tip">🎯 Clique no botão para aplicar o pooling e veja como a informação mais relevante é preservada mesmo com 75% menos dados!</div>
+  <button id="doPool" style="margin-top:10px">⚡ Executar Max Pooling</button>
+</div>
+
+<!-- MISSÃO 4 -->
+<div class="card mission hidden" id="m4">
+  <h3>🧠 Missão 4 — A Pipeline Completa: Da Foto à Previsão <span class="badge">+35 XP</span></h3>
+  <p>Veja como tudo se conecta em uma <b>Rede Convolucional (CNN) moderna</b>. Clique em cada etapa do pipeline para inspecionar:</p>
+  <div class="row" style="gap:10px">
+    <button class="pipe-btn" data-step="1">1. Imagem de Entrada</button>
+    <button class="pipe-btn sec" data-step="2">2. Convolução (Filtros)</button>
+    <button class="pipe-btn sec" data-step="3">3. ReLU (Ativação)</button>
+    <button class="pipe-btn sec" data-step="4">4. Pooling (Compressão)</button>
+    <button class="pipe-btn sec" data-step="5">5. Neurônios Finais</button>
+    <button class="pipe-btn sec" data-step="6">6. Previsão ("Gato 98%")</button>
+  </div>
+  <div class="tip" id="pipeDesc" style="border-left:4px solid var(--y);margin-top:14px">
+    Clique na primeira etapa acima para começar a inspeção da arquitetura!
+  </div>
+  <p>Etapas inspecionadas: <b id="pipeCount">0 / 6</b></p>
+</div>
+
+<!-- QUIZ -->
+<div class="card mission hidden quiz" id="m5">
+  <h3>🏆 Desafio Final da Aula 4 <span class="badge">+50 XP</span></h3>
+  <p id="qq"></p><div id="qa"></div>
+</div>
+
+<div class="card hidden" id="end">
+  <h2>🎉 Parabéns! Você dominou Visão Computacional & CNNs!</h2>
+  <p>Agora você entende a engrenagem visual da inteligência artificial:</p>
+  <ul>
+    <li>✅ <b>Imagens = Matrizes numéricas</b> de 0 a 255.</li>
+    <li>✅ <b>Convolução</b> usa filtros para extrair bordas, linhas e texturas.</li>
+    <li>✅ <b>Max Pooling</b> reduz resolução sem perder o que importa.</li>
+    <li>✅ As camadas finais classificam o objeto com precisão sobre-humana.</li>
+  </ul>
+  <div class="tip">💼 <b>Como isso gera receita no mundo real:</b> Soluções de inspeção de defeitos em fábricas, leitura de notas fiscais (OCR) e diagnóstico médico por imagem usam exatamente essa arquitetura e pagam contratos de consultoria altíssimos.</div>
+  <p>➡️ Próximo passo: <b>Aula 5 — A Revolução dos Transformers e LLMs (Como o ChatGPT e o Gemini funcionam por dentro!)</b></p>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let xp=0,done={};
+function gain(n,m){
+  xp+=n;
+  $('xp').style.width=Math.min(100,xp/175*100)+'%';
+  $('xpt').textContent=xp+' XP';
+  $('lvl').textContent='Nível '+(1+Math.floor(xp/60));
+  const t=$('toast');t.textContent=m+'  +'+n+' XP';t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+function complete(id,n,m,next){
+  if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,m);
+  if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),450);}
+}
+
+/* ===== MISSÃO 1: Pixel Grid ===== */
+const N=8;
+let grid=Array(N*N).fill(0);
+const pGrid=$('pixelGrid');
+for(let i=0;i<N*N;i++){
+  const cell=document.createElement('div');
+  cell.className='pixel-cell';
+  cell.style.background='#000';
+  cell.style.color='#64748b';
+  cell.textContent='0';
+  cell.onpointerdown=()=>toggleCell(i);
+  cell.onpointerenter=e=>{if(e.buttons===1)toggleCell(i);};
+  pGrid.appendChild(cell);
+}
+function toggleCell(i){
+  grid[i]=grid[i]===0?255:0;
+  updateGridUI();
+}
+function updateGridUI(){
+  const cells=pGrid.children;
+  let lit=0;
+  let mat='';
+  for(let r=0;r<N;r++){
+    let rowTxt='[';
+    for(let c=0;c<N;c++){
+      const idx=r*N+c;
+      const v=grid[idx];
+      cells[idx].style.background=v===255?'#fff':'#000';
+      cells[idx].style.color=v===255?'#000':'#475569';
+      cells[idx].textContent=v;
+      if(v>0)lit++;
+      rowTxt+=String(v).padStart(3,' ')+(c<N-1?',':'');
+    }
+    mat+=rowTxt+']\n';
+  }
+  $('pixelsLit').textContent=lit+' pixels acesos';
+  $('matrixView').textContent=mat;
+  if(lit>=8)complete('m1',30,'Entendeu a matriz de pixels!','m2');
+}
+$('clrGrid').onclick=()=>{grid.fill(0);updateGridUI();};
+$('presetCross').onclick=()=>{
+  grid.fill(0);
+  for(let i=0;i<N;i++){grid[3*N+i]=255;grid[i*N+3]=255;}
+  updateGridUI();
+};
+$('presetCircle').onclick=()=>{
+  grid.fill(0);
+  const circ=[10,11,12,13,17,22,25,30,33,38,42,43,44,45];
+  circ.forEach(i=>grid[i]=255);
+  updateGridUI();
+};
+updateGridUI();
+
+/* ===== MISSÃO 2: Filtros de Convolução ===== */
+const cin=$('convInput'),cxin=cin.getContext('2d');
+const cout=$('convOutput'),cxout=cout.getContext('2d');
+const S=240,BS=S/8;
+const kernels={
+  h:[[-1,-2,-1],[0,0,0],[1,2,1]],
+  v:[[-1,0,1],[-2,0,2],[-1,0,1]],
+  s:[[0,-1,0],[-1,5,-1],[0,-1,0]]
+};
+let curKernel='h';
+function drawKernel(){
+  const k=kernels[curKernel];
+  $('kernelBox').innerHTML=`<table style="margin:auto;border-collapse:collapse;color:#38bdf8">`+
+    k.map(row=>`<tr>`+row.map(v=>`<td style="padding:4px 8px;border:1px solid #334155">${v>=0?'+'+v:v}</td>`).join('')+`</tr>`).join('')+
+    `</table>`;
+}
+function renderConv(scanR=-1,scanC=-1){
+  cxin.clearRect(0,0,S,S);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const v=grid[r*N+c];
+    cxin.fillStyle=v===255?'#fff':'#0b0e1a';
+    cxin.fillRect(c*BS,r*BS,BS,BS);
+    cxin.strokeStyle='#1e293b';cxin.strokeRect(c*BS,r*BS,BS,BS);
+  }
+  // Desenha a lupa 3x3 se estiver escaneando
+  if(scanR>=0&&scanC>=0){
+    cxin.strokeStyle='#facc15';cxin.lineWidth=3;
+    cxin.strokeRect((scanC-1)*BS,(scanR-1)*BS,BS*3,BS*3);
+  }
+}
+function computeConv(){
+  cxout.clearRect(0,0,S,S);
+  const k=kernels[curKernel];
+  for(let r=1;r<N-1;r++)for(let c=1;c<N-1;c++){
+    let sum=0;
+    for(let kr=-1;kr<=1;kr++)for(let kc=-1;kc<=1;kc++){
+      sum+=grid[(r+kr)*N+(c+kc)]*k[kr+1][kc+1];
+    }
+    const val=Math.min(255,Math.max(0,Math.abs(sum)/3));
+    cxout.fillStyle=`rgb(${val},${val},${val})`;
+    cxout.fillRect(c*BS,r*BS,BS,BS);
+    cxout.strokeStyle='#1e293b';cxout.strokeRect(c*BS,r*BS,BS,BS);
+  }
+}
+$('fEdgeH').onclick=()=>{curKernel='h';drawKernel();computeConv();};
+$('fEdgeV').onclick=()=>{curKernel='v';drawKernel();computeConv();};
+$('fSharpen').onclick=()=>{curKernel='s';drawKernel();computeConv();};
+$('autoScan').onclick=()=>{
+  let r=1,c=1;
+  const t=setInterval(()=>{
+    renderConv(r,c);
+    c++;
+    if(c>=N-1){c=1;r++;}
+    if(r>=N-1){
+      clearInterval(t);renderConv(-1,-1);computeConv();
+      complete('m2',35,'Mestre dos Filtros Convolucionais!','m3');
+    }
+  },120);
+};
+drawKernel();renderConv();computeConv();
+
+/* ===== MISSÃO 3: Max Pooling ===== */
+const poolVals=[12, 85, 204, 30, 45, 99, 15, 180, 220, 110, 5, 40, 80, 245, 90, 150];
+const poolIn=$('poolIn');
+poolVals.forEach((v,idx)=>{
+  const d=document.createElement('div');
+  d.className='pixel-cell';
+  d.style.width='52px';d.style.height='52px';
+  d.style.background=`rgb(${v},${Math.round(v*0.6)},${Math.round(v*0.9)})`;
+  d.style.color=v>120?'#000':'#fff';
+  d.style.fontSize='12px';
+  d.textContent=v;
+  poolIn.appendChild(d);
+});
+$('doPool').onclick=()=>{
+  const out=$('poolOut');
+  out.innerHTML='';
+  const results=[
+    Math.max(poolVals[0],poolVals[1],poolVals[4],poolVals[5]),
+    Math.max(poolVals[2],poolVals[3],poolVals[6],poolVals[7]),
+    Math.max(poolVals[8],poolVals[9],poolVals[12],poolVals[13]),
+    Math.max(poolVals[10],poolVals[11],poolVals[14],poolVals[15])
+  ];
+  results.forEach(v=>{
+    const d=document.createElement('div');
+    d.className='pixel-cell';
+    d.style.width='60px';d.style.height='60px';
+    d.style.background=`rgb(${v},${Math.round(v*0.6)},${Math.round(v*0.9)})`;
+    d.style.color=v>120?'#000':'#fff';
+    d.style.fontSize='14px';
+    d.textContent=v;
+    out.appendChild(d);
+  });
+  complete('m3',25,'Compreendeu o Max Pooling!','m4');
+};
+
+/* ===== MISSÃO 4: Pipeline CNN ===== */
+const pipeSteps={
+  1:'<b>1. Imagem de Entrada:</b> Recebe a matriz de pixels brutos da câmera ou arquivo (ex: 224x224 com 3 canais de cor RGB).',
+  2:'<b>2. Convolução:</b> Dezenas de filtros 3x3 varrem a imagem procurando traços simples: bordas, curvas e cantos.',
+  3:'<b>3. Ativação ReLU:</b> Zera valores negativos para permitir que a rede aprenda relações não-lineares complexas.',
+  4:'<b>4. Max Pooling:</b> Reduz a resolução pela metade mantendo os traços mais marcantes, tornando o processamento leve e rápido.',
+  5:'<b>5. Camadas Densas (Neurônios Finais):</b> Combinam todas as peças encontradas (orelha + bigode + rabo) para tomar a decisão.',
+  6:'<b>6. Previsão Final (Softmax):</b> Entrega a probabilidade percentual: <code>Gato: 98.4%</code>, <code>Cachorro: 1.2%</code>, <code>Carro: 0.4%</code>.'
+};
+let clickedSteps=new Set();
+document.querySelectorAll('.pipe-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    const s=btn.dataset.step;
+    document.querySelectorAll('.pipe-btn').forEach(b=>b.className='pipe-btn sec');
+    btn.className='pipe-btn';
+    $('pipeDesc').innerHTML=pipeSteps[s];
+    clickedSteps.add(s);
+    $('pipeCount').textContent=clickedSteps.size+' / 6';
+    if(clickedSteps.size>=6){
+      complete('m4',35,'Arquiteto de CNN dominado!','m5');
+      quiz();
+    }
+  };
+});
+
+/* ===== QUIZ ===== */
+const Q=[
+  ["Como o computador enxerga uma imagem em preto e branco?",["Como texto em inglês","Como uma matriz com números de 0 a 255","Como um único número gigante"],1],
+  ["Qual o papel dos filtros na convolução?",["Apagar a imagem","Identificar características visuais como bordas, cantos e texturas","Fazer o computador reiniciar"],1],
+  ["Para que serve o Max Pooling?",["Reduzir o tamanho da imagem mantendo os traços mais fortes e acelerar o processamento","Mudar as cores da foto para preto","Aumentar o brilho da imagem"],0]
+];
+let qi=0;
+function quiz(){
+  if(qi>=Q.length){complete('m5',50,'Mestre da Aula 4!','end');return;}
+  const [q,ops,r]=Q[qi];
+  $('qq').textContent=`Pergunta ${qi+1}/${Q.length}: ${q}`;
+  $('qa').innerHTML='';
+  ops.forEach((o,i)=>{
+    const bt=document.createElement('button');bt.textContent=o;
+    bt.onclick=()=>{if(i===r){bt.className='right';qi++;setTimeout(quiz,700);}else bt.className='wrong';};
+    $('qa').appendChild(bt);
+  });
+}
+</script>
+</body>
+</html>

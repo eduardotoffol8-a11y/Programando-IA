@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 6 — RAG & Bancos Vetoriais (Conectando a IA a PDFs e Dados da Empresa)</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--a:#38bdf8;--b:#f472b6;--y:#facc15;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--txt)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:10;border-bottom:1px solid #2a3050}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  main{max-width:1040px;margin:auto;padding:20px}
+  .card{background:var(--card);border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 4px 20px #0005}
+  .mission{border-left:5px solid var(--acc)}
+  .mission.done{border-left-color:var(--ok)}
+  .mission h3{margin:0 0 8px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;background:#2a3050;font-size:.8rem;margin-left:6px}
+  button{background:var(--acc);color:#fff;border:0;padding:10px 16px;border-radius:10px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0;font-weight:600}
+  button:hover{filter:brightness(1.15)}
+  button.sec{background:#2a3050}
+  .row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .tip{background:#22284a;padding:12px 16px;border-radius:10px;margin-top:12px;font-size:.95rem;line-height:1.5}
+  .hidden{display:none}
+  .mono{font-family:Consolas,monospace;background:#0b0e1a;padding:14px;border-radius:10px;line-height:1.6;font-size:.92rem}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:12px 22px;border-radius:12px;font-weight:700;transition:transform .4s;z-index:99}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  canvas{background:#0b0e1a;border-radius:12px}
+  .chunk-box{border:1px solid #3b4268;background:#151a2e;padding:10px 14px;border-radius:8px;margin-bottom:8px;transition:all .2s}
+  .chunk-box.highlight{border-color:var(--y);background:#252d4a;box-shadow:0 0 12px rgba(250,204,21,.3)}
+  .quiz button{display:block;width:100%;text-align:left;background:#2a3050;margin-bottom:8px}
+  .quiz button.right{background:var(--ok);color:#052e16}
+  .quiz button.wrong{background:#ef4444}
+  input[type=range]{width:100%}
+  .pipe-step{padding:10px 14px;border-radius:8px;background:#1e293b;margin-bottom:8px;border-left:4px solid #475569;transition:all .3s}
+  .pipe-step.active{border-left-color:var(--y);background:#2e3650}
+  .pipe-step.done{border-left-color:var(--ok)}
+</style>
+</head>
+<body>
+<header>
+  <b>📚 Academia IA — Aula 6: RAG & Bancos Vetoriais</b>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="lvl">Nível 1</span>
+    <div class="xpbar"><div class="xpfill" id="xp"></div></div>
+    <span id="xpt">0 XP</span>
+  </div>
+</header>
+<main>
+
+<div class="card">
+  <h2>Como Conectar a IA aos Documentos Secretos de Qualquer Empresa? ⏱️ 14 min</h2>
+  <p>O ChatGPT ou Gemini <b>não conhecem</b> os contratos, manuais internos ou PDFs privados de uma empresa. E se você tentar treiná-los do zero, custará milhões de dólares e eles ainda podem alucinar.<br>
+  A solução que 90% das empresas usam e contratam hoje se chama <b>RAG (Geração Aumentada por Recuperação)</b>. Hoje você vai ver a esteira completa funcionando!</p>
+</div>
+
+<!-- MISSÃO 1 -->
+<div class="card mission" id="m1">
+  <h3>✂️ Missão 1 — Fatiando Documentos (Chunking Inteligente) <span class="badge">+30 XP</span></h3>
+  <p>PDFs corporativos têm centenas de páginas. Não dá para enfiar tudo na IA de uma vez só. O primeiro passo é fatiar o texto em <b>pedaços (chunks)</b> com um pouco de <b>sobreposição (overlap)</b> para não cortar frases ao meio.</p>
+  <div class="row">
+    <div style="flex:1;min-width:280px">
+      <label>Tamanho do Pedaço (Chunk Size): <b id="lblSize" style="color:var(--y)">120 caracteres</b></label>
+      <input type="range" id="chunkSize" min="70" max="220" step="10" value="120">
+      
+      <label style="margin-top:10px;display:block">Sobreposição (Overlap): <b id="lblOverlap" style="color:var(--a)">30 caracteres</b></label>
+      <input type="range" id="chunkOverlap" min="0" max="60" step="5" value="30">
+      
+      <div class="tip">💡 <b>Por que o Overlap é vital?</b> Se a frase <i>"O reembolso máximo é de R$ 500"</i> for cortada entre dois pedaços, a IA pode ler apenas <i>"O reembolso máximo é..."</i> no pedaço 1 e perder o valor! O overlap garante a continuidade.</div>
+    </div>
+    <div style="flex:1.2;min-width:300px">
+      <b>Pedaços gerados no Banco de Dados:</b>
+      <div id="chunksOutput" style="margin-top:8px;max-height:260px;overflow-y:auto"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 2 -->
+<div class="card mission hidden" id="m2">
+  <h3>🎯 Missão 2 — O Radar Vetorial (Similaridade de Cosseno) <span class="badge">+35 XP</span></h3>
+  <p>Cada pedaço de documento vira um <b>vetor numérico</b> armazenado em um <b>Banco Vetorial</b> (como Pinecone, ChromaDB ou Qdrant).<br>
+  Quando o usuário faz uma pergunta, a IA procura os pedaços com a <b>menor distância de ângulo (Similaridade de Cosseno)</b>:</p>
+  <div style="margin-bottom:12px">
+    <span>Escolha uma pergunta para disparar a busca:</span><br>
+    <button class="sec q-btn" data-q="reembolso">"Qual o prazo para pedir reembolso da viagem?"</button>
+    <button class="sec q-btn" data-q="ferias">"Como solicitar férias coletivas?"</button>
+    <button class="sec q-btn" data-q="seguranca">"Qual é a regra para senhas do sistema?"</button>
+  </div>
+  <div class="row">
+    <canvas id="radarCanvas" width="460" height="320"></canvas>
+    <div style="flex:1;min-width:260px">
+      <b>Top Trechos Mais Relevantes Encontrados:</b>
+      <div id="retrievedList" style="margin-top:10px">
+        <div class="mono" style="color:#94a3b8">Clique em uma pergunta acima para rodar a busca vetorial...</div>
+      </div>
+      <div class="tip">💡 Note que a busca não procura palavras exatas como no Google tradicional ("Ctrl+F"). Ela procura <b>significados parecidos</b>, mesmo que o usuário use sinônimos ou escreva com gírias!</div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 3 -->
+<div class="card mission hidden" id="m3">
+  <h3>⚡ Missão 3 — O Combate: Com RAG vs Sem RAG <span class="badge">+35 XP</span></h3>
+  <p>Veja a diferença brutal de precisão entre perguntar para um LLM "puro" versus usar a técnica RAG com os documentos da empresa:</p>
+  <div class="row">
+    <div class="card" style="flex:1;background:#241926;border:1px solid #f43f5e;min-width:280px">
+      <h4 style="color:#f43f5e;margin:0 0 8px">❌ Sem RAG (IA "Pura" / Alucinação)</h4>
+      <p style="font-size:13px;color:#cbd5e1">Pergunta: <i>"Qual a política de home office da Startup X?"</i></p>
+      <div class="mono" style="color:#fda4af;font-size:13px">
+        "A Startup X normalmente adota um modelo híbrido com 2 dias presenciais, embora isso possa variar conforme a legislação trabalhista brasileira..."<br>
+        <b style="color:#f43f5e">⚠️ ALUCINAÇÃO: A IA inventou uma resposta genérica porque não tem os dados reais!</b>
+      </div>
+    </div>
+    <div class="card" style="flex:1;background:#142921;border:1px solid #10b981;min-width:280px">
+      <h4 style="color:#10b981;margin:0 0 8px">✅ Com RAG (Aterrada nos Documentos)</h4>
+      <p style="font-size:13px;color:#cbd5e1">Pergunta: <i>"Qual a política de home office da Startup X?"</i></p>
+      <div class="mono" style="color:#a7f3d0;font-size:13px">
+        "Segundo a Cláusula 4.2 do Manual do Colaborador 2026, os funcionários têm direito a 100% de trabalho remoto, com ajuda de custo mensal de R$ 250,00 para internet."<br>
+        <b style="color:#10b981">🎯 RESPOSTA EXATA + FONTE CITADA!</b>
+      </div>
+    </div>
+  </div>
+  <button id="btnUnderstand" style="margin-top:8px">Entendi a diferença na prática! ✅</button>
+</div>
+
+<!-- MISSÃO 4 -->
+<div class="card mission hidden" id="m4">
+  <h3>🚀 Missão 4 — A Esteira RAG Completa em Ação <span class="badge">+35 XP</span></h3>
+  <p>Clique em <b>Executar Pipeline</b> e acompanhe as 4 etapas acontecendo em tempo real:</p>
+  <button id="runPipeline">▶️ Executar Pipeline RAG Completo</button>
+  <div style="margin-top:14px">
+    <div class="pipe-step" id="ps1">1️⃣ <b>Usuário faz a pergunta</b>: <i>"Até que dia posso entregar os recibos de despesas?"</i></div>
+    <div class="pipe-step" id="ps2">2️⃣ <b>Geração de Embedding da pergunta</b>: O texto vira um vetor de 1536 números.</div>
+    <div class="pipe-step" id="ps3">3️⃣ <b>Busca no Banco Vetorial</b>: Encontra o trecho do PDF de finanças (Similaridade: 94.2%).</div>
+    <div class="pipe-step" id="ps4">4️⃣ <b>Prompt Aumentado entregue ao LLM</b>: A IA responde com base exclusiva no trecho recuperado!</div>
+  </div>
+  <div class="mono hidden" id="finalRagOutput" style="margin-top:12px;color:#facc15;border:1px solid #eab308"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="card mission hidden quiz" id="m5">
+  <h3>🏆 Desafio Final da Aula 6 <span class="badge">+50 XP</span></h3>
+  <p id="qq"></p><div id="qa"></div>
+</div>
+
+<div class="card hidden" id="end">
+  <h2>🎉 Sensacional! Você dominou a Arquitetura RAG!</h2>
+  <p>Você acabou de aprender a tecnologia mais lucrativa do mercado de IA atual:</p>
+  <ul>
+    <li>✅ <b>Chunking & Overlap:</b> Como fatiar manuais e PDFs sem perder o contexto.</li>
+    <li>✅ <b>Bancos Vetoriais & Similaridade de Cosseno:</b> Como encontrar trechos por afinidade de significado em milissegundos.</li>
+    <li>✅ <b>Fim das Alucinações:</b> A IA responde apenas com fatos documentados e cita a fonte exata.</li>
+  </ul>
+  <div class="tip">💼 <b>Onde está o dinheiro:</b> Qualquer escritório de advocacia, clínica médica, e-commerce ou multinacional precisa de um assistente RAG para responder dúvidas sobre contratos e políticas internas. Um projeto desse porte custa entre <b>R$ 15.000 e R$ 80.000</b> para ser implantado por um engenheiro de IA!</div>
+  <p>➡️ Próxima parada: <b>Aula 7 — Agentes Autônomos de IA & Function Calling (IAs que não só conversam, mas executam tarefas sozinhas!)</b></p>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let xp=0,done={};
+function gain(n,m){
+  xp+=n;
+  $('xp').style.width=Math.min(100,xp/185*100)+'%';
+  $('xpt').textContent=xp+' XP';
+  $('lvl').textContent='Nível '+(1+Math.floor(xp/60));
+  const t=$('toast');t.textContent=m+'  +'+n+' XP';t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+function complete(id,n,m,next){
+  if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,m);
+  if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),450);}
+}
+
+/* ===== MISSÃO 1: Chunking ===== */
+const sampleDoc = "O processo de reembolso de despesas corporativas exige que o colaborador anexe as notas fiscais até o 5º dia útil do mês subsequente. Viagens nacionais têm limite diário de alimentação fixado em R$ 120,00. As solicitações de férias devem ser enviadas com pelo menos 30 dias de antecedência no portal interno. Para a segurança dos dados, senhas de acesso aos servidores devem conter no mínimo 12 dígitos e ser renovadas a cada 90 dias.";
+
+function updateChunks(){
+  const size = +$('chunkSize').value;
+  const overlap = Math.min(+$('chunkOverlap').value, size - 20);
+  $('lblSize').textContent = size + ' caracteres';
+  $('lblOverlap').textContent = overlap + ' caracteres';
+  
+  const container = $('chunksOutput');
+  container.innerHTML = '';
+  let start = 0, idx = 1;
+  while(start < sampleDoc.length){
+    const end = Math.min(sampleDoc.length, start + size);
+    const text = sampleDoc.slice(start, end);
+    const box = document.createElement('div');
+    box.className = 'chunk-box';
+    box.innerHTML = `<span style="color:var(--y);font-size:12px;font-weight:bold">Chunk #${idx} (pos: ${start}-${end}):</span><br><span style="font-size:13px">${text}</span>`;
+    container.appendChild(box);
+    idx++;
+    if(end >= sampleDoc.length) break;
+    start += (size - overlap);
+  }
+  if(idx >= 3) complete('m1',30,'Aprendeu Chunking & Overlap!','m2');
+}
+$('chunkSize').oninput = updateChunks;
+$('chunkOverlap').oninput = updateChunks;
+updateChunks();
+
+/* ===== MISSÃO 2: Radar Vetorial ===== */
+const rc = $('radarCanvas'), rx = rc.getContext('2d');
+const docVectors = [
+  {id:1, title:"Reembolso de Viagens & Notas", angle: 0.35, dist: 110, cat:'reembolso', text:"Notas fiscais devem ser anexadas até o 5º dia útil. Limite de refeição: R$ 120/dia."},
+  {id:2, title:"Solicitação de Férias Coletivas", angle: 1.85, dist: 120, cat:'ferias', text:"Férias devem ser pedidas com 30 dias de antecedência no portal RH."},
+  {id:3, title:"Política de Senhas & Segurança", angle: 3.45, dist: 115, cat:'seguranca', text:"Senhas exigem mínimo de 12 dígitos e troca obrigatória a cada 90 dias."}
+];
+let userVec = null, chosenQ = null;
+
+function drawRadar(){
+  rx.clearRect(0,0,460,320);
+  const cx = 230, cy = 160;
+  // Círculos concêntricos do radar
+  rx.strokeStyle = '#1e293b'; rx.lineWidth = 1;
+  [50, 90, 130].forEach(r => {
+    rx.beginPath(); rx.arc(cx, cy, r, 0, Math.PI*2); rx.stroke();
+  });
+  // Linhas de eixos
+  rx.beginPath(); rx.moveTo(cx-140, cy); rx.lineTo(cx+140, cy); rx.stroke();
+  rx.beginPath(); rx.moveTo(cx, cy-140); rx.lineTo(cx, cy+140); rx.stroke();
+
+  // Vetor do usuário (pergunta)
+  if(userVec){
+    rx.strokeStyle = '#facc15'; rx.lineWidth = 3;
+    rx.beginPath(); rx.moveTo(cx, cy);
+    const ux = cx + Math.cos(userVec.angle)*135;
+    const uy = cy + Math.sin(userVec.angle)*135;
+    rx.lineTo(ux, uy); rx.stroke();
+    rx.fillStyle = '#facc15'; rx.beginPath(); rx.arc(ux, uy, 7, 0, 7); rx.fill();
+    rx.font = 'bold 12px sans-serif'; rx.fillText('Pergunta', ux+10, uy);
+  }
+
+  // Vetores dos documentos
+  docVectors.forEach(doc => {
+    const isMatched = chosenQ === doc.cat;
+    const dx = cx + Math.cos(doc.angle)*doc.dist;
+    const dy = cy + Math.sin(doc.angle)*doc.dist;
+    rx.strokeStyle = isMatched ? '#22c55e' : '#334155';
+    rx.lineWidth = isMatched ? 2.5 : 1;
+    rx.beginPath(); rx.moveTo(cx, cy); rx.lineTo(dx, dy); rx.stroke();
+    rx.fillStyle = isMatched ? '#22c55e' : '#38bdf8';
+    rx.beginPath(); rx.arc(dx, dy, isMatched ? 8 : 5, 0, 7); rx.fill();
+    rx.fillStyle = isMatched ? '#fff' : '#94a3b8';
+    rx.font = isMatched ? 'bold 12px sans-serif' : '11px sans-serif';
+    rx.fillText(`Doc #${doc.id}`, dx+10, dy+4);
+  });
+}
+
+document.querySelectorAll('.q-btn').forEach(btn => {
+  btn.onclick = () => {
+    const q = btn.dataset.q;
+    chosenQ = q;
+    document.querySelectorAll('.q-btn').forEach(b => b.className = 'sec q-btn');
+    btn.className = 'q-btn';
+    const targetDoc = docVectors.find(d => d.cat === q);
+    userVec = { angle: targetDoc.angle + 0.08 }; // Muito próximo no ângulo!
+    drawRadar();
+    
+    $('retrievedList').innerHTML = `
+      <div class="chunk-box highlight">
+        <span style="color:#22c55e;font-weight:bold">🎯 Trecho Recuperado do PDF (Similaridade: 97.4%):</span><br>
+        <b>${targetDoc.title}</b><br>
+        <span style="font-size:13px;color:#cbd5e1">"${targetDoc.text}"</span>
+      </div>
+    `;
+    complete('m2', 35, 'Busca Vetorial por Cosseno realizada!', 'm3');
+  };
+});
+drawRadar();
+
+/* ===== MISSÃO 3: Com vs Sem RAG ===== */
+$('btnUnderstand').onclick = () => {
+  complete('m3', 35, 'Entendeu o combate RAG vs Alucinação!', 'm4');
+};
+
+/* ===== MISSÃO 4: Pipeline Completo ===== */
+$('runPipeline').onclick = () => {
+  const steps = [$('ps1'), $('ps2'), $('ps3'), $('ps4')];
+  steps.forEach(s => { s.className = 'pipe-step'; });
+  let cur = 0;
+  const timer = setInterval(() => {
+    if(cur > 0) steps[cur-1].className = 'pipe-step done';
+    if(cur < steps.length){
+      steps[cur].className = 'pipe-step active';
+      cur++;
+    } else {
+      clearInterval(timer);
+      steps[steps.length-1].className = 'pipe-step done';
+      const out = $('finalRagOutput');
+      out.classList.remove('hidden');
+      out.innerHTML = `
+        <b>🤖 Resposta Final Gerada pelo Modelo:</b><br>
+        <i>"Você pode enviar os recibos de despesas corporativas até o <b>5º dia útil do mês subsequente</b>, conforme especificado na política interna de reembolsos."</i><br>
+        <span style="color:#a7f3d0;font-size:12px">Fonte: Manual_Corporativo_2026.pdf (Página 12)</span>
+      `;
+      complete('m4', 35, 'Pipeline RAG executado do início ao fim!', 'm5');
+      quiz();
+    }
+  }, 600);
+};
+
+/* ===== QUIZ ===== */
+const Q = [
+  ["Por que as empresas usam RAG em vez de retreinar o modelo de IA do zero?", ["Porque retreinar é caríssimo e não garante que o modelo pare de inventar informações","Porque RAG desliga a internet","Porque modelos retreinados não sabem português"], 0],
+  ["Qual a função de um Banco Vetorial (Vector DB)?", ["Guardar senhas de usuários","Armazenar os pedaços de texto como vetores numéricos e fazer buscas ultra-rápidas por significado","Desenhar imagens 3D"], 1],
+  ["Para que serve a sobreposição (overlap) no fatiamento (chunking) de documentos?", ["Para deixar o arquivo mais pesado","Para evitar que frases importantes sejam cortadas no meio entre dois pedaços","Para mudar o idioma do texto"], 1]
+];
+let qi = 0;
+function quiz(){
+  if(qi >= Q.length){ complete('m5', 50, 'Mestre da Arquitetura RAG!', 'end'); return; }
+  const [q, ops, r] = Q[qi];
+  $('qq').textContent = `Pergunta ${qi+1}/${Q.length}: ${q}`;
+  $('qa').innerHTML = '';
+  ops.forEach((o, i) => {
+    const bt = document.createElement('button'); bt.textContent = o;
+    bt.onclick = () => {
+      if(i === r){ bt.className = 'right'; qi++; setTimeout(quiz, 700); }
+      else bt.className = 'wrong';
+    };
+    $('qa').appendChild(bt);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 9 — Blueprint de Monetização, Vendas & Grande Exame Cumulativo</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444;--a:#38bdf8;--b:#f472b6;--y:#facc15;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55}
+  
+  /* NAVEGAÇÃO */
+  nav.top-nav{background:#111528;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a3050;font-size:0.9rem}
+  nav.top-nav a{color:var(--a);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  nav.top-nav a:hover{text-decoration:underline}
+  
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:20;border-bottom:1px solid #2a3050}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  
+  main{max-width:1080px;margin:auto;padding:24px 20px}
+  .card{background:var(--card);border-radius:16px;padding:24px;margin-bottom:22px;box-shadow:0 4px 24px #0006}
+  .mission{border-left:5px solid var(--acc);transition:border-color .3s}
+  .mission.done{border-left-color:var(--ok)}
+  .mission h3{margin:0 0 10px;font-size:1.3rem}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;background:#2a3050;font-size:.8rem;margin-left:8px;font-weight:normal}
+  
+  button{background:var(--acc);color:#fff;border:0;padding:11px 18px;border-radius:10px;font-size:0.95rem;cursor:pointer;margin:4px 6px 4px 0;font-weight:600;transition:all .15s}
+  button:hover{filter:brightness(1.15);transform:translateY(-1px)}
+  button.sec{background:#2a3050;color:#cbd5e1}
+  button.sec:hover{background:#38416d}
+  
+  .row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+  .tip{background:#22284a;padding:14px 18px;border-radius:12px;margin-top:14px;font-size:.95rem;border-left:4px solid var(--a)}
+  .hidden{display:none}
+  .mono{font-family:Consolas,SFMono-Regular,Menlo,monospace;background:#0b0e1a;padding:14px;border-radius:10px;line-height:1.65;font-size:.9rem;border:1px solid #222944}
+  
+  /* PROPOSTA COMERCIAL & CARDS DE NEGÓCIO */
+  .biz-card{background:#13182c;border:1px solid #2d3557;border-radius:12px;padding:18px;flex:1;min-width:240px;cursor:pointer;transition:all .2s}
+  .biz-card:hover{border-color:var(--a);transform:translateY(-2px)}
+  .biz-card.selected{border-color:var(--ok);background:#16272e}
+  .biz-card h4{margin:0 0 8px;font-size:1.1rem;display:flex;justify-content:space-between;align-items:center}
+  .price-tag{font-size:1.25rem;font-weight:700;color:var(--y)}
+  
+  /* SIMULADOR DE ORÇAMENTO */
+  .calc-box{background:#111628;border:1px solid #2e385c;border-radius:14px;padding:20px}
+  .scope-check{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;background:#1a213a;margin-bottom:8px;cursor:pointer}
+  .scope-check input{width:18px;height:18px;cursor:pointer}
+  
+  /* QUIZ CUMULATIVO */
+  .quiz-box{background:#111628;border:1px solid #2e385c;border-radius:14px;padding:20px;margin-top:16px}
+  .quiz-tag{font-size:0.75rem;padding:3px 8px;border-radius:6px;background:#2a3050;color:#93c5fd;font-weight:bold;text-transform:uppercase}
+  .quiz-option{display:block;width:100%;text-align:left;background:#1e2642;color:#e2e8f0;padding:14px 16px;border-radius:10px;margin-bottom:10px;font-size:0.95rem;line-height:1.45;border:1px solid #333f68;transition:all .15s}
+  .quiz-option:hover{background:#2a365e;border-color:var(--a)}
+  .quiz-option.correct{background:#143825;border-color:var(--ok);color:#86efac;font-weight:600}
+  .quiz-option.incorrect{background:#38161c;border-color:var(--err);color:#fca5a5}
+  .quiz-feedback{padding:14px 18px;border-radius:10px;margin-top:12px;font-size:0.93rem;line-height:1.55}
+  
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:14px 26px;border-radius:14px;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,0.5);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);z-index:999}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .nav-footer{display:flex;justify-content:space-between;align-items:center;background:#111628;padding:18px 24px;border-radius:14px;border:1px solid #2a3050;margin-top:30px}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="aula08-mlops-deploy-e-producao.html">⬅️ Aula 8: MLOps & Deploy</a>
+  <span style="color:#64748b;font-weight:600">Trilha Mestre IA • Nível 3 (Monetização & Negócios)</span>
+  <span style="color:#94a3b8">Aula 9 de 10</span>
+</nav>
+
+<header>
+  <b>💼 Academia IA — Aula 9: Monetização & Grande Exame Integrador</b>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="lvl" style="font-weight:600">Nível 1</span>
+    <div class="xpbar"><div class="xpfill" id="xp"></div></div>
+    <span id="xpt" style="color:var(--y);font-weight:bold">0 XP</span>
+  </div>
+</header>
+
+<main>
+
+<div class="card">
+  <h2>Transformando Conhecimento Técnico em Faturamento Real ⏱️ 18 min</h2>
+  <p>Você dominou o ciclo completo: do neurônio individual ao Deep Learning, passando por Visão Computacional, Transformers, RAG, Agentes e MLOps em produção.<br>
+  Agora vem a pergunta central que você fez no primeiro dia: <b>como empacotar e vender essa informação?</b> Hoje vamos estruturar seus <b>produtos digitais, serviços de consultoria B2B e testar tudo com um grande exame cumulativo</b>.</p>
+</div>
+
+<!-- MISSÃO 1 -->
+<div class="card mission" id="m1">
+  <h3>📦 Missão 1 — Os 4 Formatos de Monetização (Com Exemplos Práticos) <span class="badge">+35 XP</span></h3>
+  <p>Clique em cada formato para ver como estruturar a oferta, o preço e a entrega:</p>
+  
+  <div class="row" style="margin-top:14px">
+    <div class="biz-card" id="b1">
+      <h4><span>1. Infoproduto Interativo</span> 📱</h4>
+      <div class="price-tag">R$ 97 — R$ 297</div>
+      <p style="font-size:13px;color:#94a3b8">Cursos práticos gamificados (como este!) para ensinar programação e IA para iniciantes.</p>
+    </div>
+    
+    <div class="biz-card" id="b2">
+      <h4><span>2. Templates de Código</span> 💻</h4>
+      <div class="price-tag">R$ 150 — R$ 500</div>
+      <p style="font-size:13px;color:#94a3b8">Repositórios prontos de FastAPI + RAG + Docker para devs economizarem 40 horas de trabalho.</p>
+    </div>
+    
+    <div class="biz-card" id="b3">
+      <h4><span>3. Consultoria de RAG B2B</span> 🏢</h4>
+      <div class="price-tag">R$ 12.000 — R$ 45.000</div>
+      <p style="font-size:13px;color:#94a3b8">Implantação de assistentes em escritórios e empresas para busca segura em PDFs e contratos.</p>
+    </div>
+    
+    <div class="biz-card" id="b4">
+      <h4><span>4. Agentes Autônomos Recorrentes</span> 🔄</h4>
+      <div class="price-tag">R$ 4.000 / mês</div>
+      <p style="font-size:13px;color:#94a3b8">SaaS ou manutenção de equipes de agentes que qualificam leads e atendem clientes 24/7.</p>
+    </div>
+  </div>
+  
+  <div class="tip" id="bizDetail" style="margin-top:18px">
+    👆 Clique em um dos modelos acima para inspecionar os detalhes operacionais e a margem de lucro.
+  </div>
+</div>
+
+<!-- MISSÃO 2 -->
+<div class="card mission hidden" id="m2">
+  <h3>🧮 Missão 2 — Simulador de Orçamento B2B na Prática <span class="badge">+40 XP</span></h3>
+  <p>Imagine que um cliente real (uma empresa de advocacia com 40 funcionários) quer uma solução de IA. Selecione os módulos que você vai entregar e veja a <b>composição de preço, prazo e margem</b>:</p>
+  
+  <div class="row">
+    <div class="calc-box" style="flex:1.3;min-width:320px">
+      <h4 style="margin:0 0 12px;color:var(--a)">Escopo do Projeto:</h4>
+      
+      <label class="scope-check">
+        <input type="checkbox" id="scRag" checked>
+        <div>
+          <b>RAG de Processos e Contratos (PDFs)</b><br>
+          <span style="font-size:12px;color:#94a3b8">Chunking, Embeddings e busca vetorial com fontes citadas.</span>
+        </div>
+      </label>
+      
+      <label class="scope-check">
+        <input type="checkbox" id="scGuard" checked>
+        <div>
+          <b>Guardrail de Segurança & Sigilo LGPD</b><br>
+          <span style="font-size:12px;color:#94a3b8">Filtros contra prompt injection e anonimização de dados sensíveis.</span>
+        </div>
+      </label>
+      
+      <label class="scope-check">
+        <input type="checkbox" id="scAgent">
+        <div>
+          <b>Agente de Disparo Automático (Tool Calling)</b><br>
+          <span style="font-size:12px;color:#94a3b8">Redige minutas e dispara e-mails de notificação via API.</span>
+        </div>
+      </label>
+      
+      <label class="scope-check">
+        <input type="checkbox" id="scDocker">
+        <div>
+          <b>Deploy em Nuvem Própria (Docker + FastAPI)</b><br>
+          <span style="font-size:12px;color:#94a3b8">Contêiner isolado sem compartilhamento de dados com terceiros.</span>
+        </div>
+      </label>
+    </div>
+    
+    <div class="calc-box" style="flex:1;min-width:260px;background:#151d36">
+      <h4 style="margin:0 0 14px;color:var(--y)">Orçamento Gerado:</h4>
+      <div style="font-size:2rem;font-weight:700;color:var(--ok)" id="valTotal">R$ 18.000</div>
+      <p style="font-size:13px;color:#cbd5e1;margin:6px 0 14px">Prazo de Entrega Estimado: <b id="valPrazo">3 semanas</b></p>
+      
+      <div class="mono" style="font-size:12px;line-height:1.5">
+        <b>Argumento de Fechamento (ROI):</b><br>
+        <i>"Sua equipe economizará cerca de 120 horas por mês na leitura de petições. O investimento se paga em menos de 60 dias de operação."</i>
+      </div>
+      
+      <button id="btnLockProposal" style="width:100%;margin-top:14px">Validar e Gerar Proposta ✅</button>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 3 -->
+<div class="card mission hidden" id="m3">
+  <h3>🌟 Missão 3 — A Estratégia "Learn in Public" (Como Atrair Clientes Sem Fazer Anúncios) <span class="badge">+35 XP</span></h3>
+  <p>Você não precisa de milhares de seguidores para fechar contratos de 5 dígitos. A técnica comprovada por engenheiros de IA internacionais se chama <b>Aprender em Público (Learn in Public)</b>:</p>
+  
+  <div class="row">
+    <div class="card" style="flex:1;background:#162038;border:1px solid #38bdf8;min-width:240px">
+      <h4 style="color:#38bdf8;margin:0 0 8px">1. O Post Diagnóstico</h4>
+      <p style="font-size:13px;color:#cbd5e1">Em vez de postar <i>"concluí uma aula de IA"</i>, poste: <i>"Como otimizei uma esteira RAG para ler 400 PDFs cortando o custo de tokens em 60% usando chunking inteligente (com código e métricas)"</i>.</p>
+    </div>
+    
+    <div class="card" style="flex:1;background:#24162e;border:1px solid #f472b6;min-width:240px">
+      <h4 style="color:#f472b6;margin:0 0 8px">2. O Repositório Vitrine</h4>
+      <p style="font-size:13px;color:#cbd5e1">Um repositório no GitHub com um README impecável, diagrama de arquitetura e instruções de Docker tem mais peso para contratações do que 10 diplomas universitários teóricos.</p>
+    </div>
+    
+    <div class="card" style="flex:1;background:#152b22;border:1px solid #4ade80;min-width:240px">
+      <h4 style="color:#4ade80;margin:0 0 8px">3. O Produto Piloto</h4>
+      <p style="font-size:13px;color:#cbd5e1">Ofereça para o primeiro cliente um projeto menor por um valor de entrada (ou custo subsidiado) em troca de um <b>estudo de caso gravado em vídeo com métricas reais</b>.</p>
+    </div>
+  </div>
+  <button id="btnLearnPublic" style="margin-top:8px">Entendi a estratégia de autoridade! 🚀</button>
+</div>
+
+<!-- MISSÃO 4: O GRANDE EXAME CUMULATIVO -->
+<div class="card mission hidden" id="m4">
+  <h3>🏆 Missão 4 — O Grande Exame Integrador (7 Questões Cumulativas das Aulas 1 a 9) <span class="badge">+80 XP</span></h3>
+  <p>Este questionário testa a retenção dos conceitos fundamentais de toda a sua jornada até aqui, cruzando teoria profunda e aplicação de mercado:</p>
+  
+  <div class="quiz-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span class="quiz-tag" id="qBadge">Origem: Aula 2 e 3</span>
+      <b id="qNumber" style="color:var(--a)">Questão 1 de 7</b>
+      <span id="qScore" style="color:var(--y);font-weight:bold">Pontos: 0</span>
+    </div>
+    <h4 id="qText" style="margin:0 0 16px;font-size:1.05rem;line-height:1.5"></h4>
+    <div id="qOptions"></div>
+    <div id="qFeedback" class="quiz-feedback hidden"></div>
+    <button id="qNext" class="hidden" style="margin-top:14px">Próxima Questão ➡️</button>
+  </div>
+</div>
+
+<div class="card hidden" id="endCard">
+  <h2>🎉 PARABÉNS! Você concluiu a Trilha Mestre de Inteligência Artificial!</h2>
+  <p>Olha a distância que você percorreu do zero absoluto até aqui:</p>
+  <ul>
+    <li>✅ <b>Fundamentos:</b> Entendeu o neurônio, pesos, gradiente descendente e backpropagation.</li>
+    <li>✅ <b>Visão & Linguagem:</b> Dominou Convoluções (CNNs) e a revolução dos Transformers e Embeddings.</li>
+    <li>✅ <b>Aplicações Modernas:</b> Construiu RAG com bancos vetoriais e orquestrou Agentes autônomos.</li>
+    <li>✅ <b>Engenharia & Negócios:</b> Aprendeu MLOps, Quantização, FastAPI e o modelo comercial para monetizar!</li>
+  </ul>
+  
+  <div class="tip" style="border-left-color:var(--ok)">
+    🏆 <b>Certificado de Domínio de IA & Engenharia:</b> Você já possui mais repertório prático do que a vasta maioria dos profissionais que apenas usam o ChatGPT na superfície. O código e o modelo de negócio estão prontos para você aplicar e vender!
+  </div>
+  
+  <div class="nav-footer">
+    <a href="aula08-mlops-deploy-e-producao.html" style="color:var(--a);text-decoration:none;font-weight:600">⬅️ Voltar para Aula 8: MLOps</a>
+    <span style="font-weight:bold;color:var(--ok)">Trilha Base Concluída! 🎓</span>
+    <a href="aula10-context-pruning-e-prompt-caching.html" style="background:#22c55e;color:#052e16;padding:11px 18px;border-radius:10px;text-decoration:none;font-weight:bold">Próxima Aula: Context Pruning & Prompt Caching ➡️</a>
+  </div>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let xp=0, done={};
+
+function gain(n,m){
+  xp+=n;
+  $('xp').style.width=Math.min(100,xp/220*100)+'%';
+  $('xpt').textContent=xp+' XP';
+  $('lvl').textContent='Nível '+(1+Math.floor(xp/60));
+  const t=$('toast');t.textContent=m+'  +'+n+' XP';t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+function complete(id,n,m,next){
+  if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,m);
+  if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),450);}
+}
+
+/* ===== MISSÃO 1: Modelos de Negócio ===== */
+const bizInfo={
+  b1:`<b>1. Infoproduto Interativo (Escala 1 para Muitos):</b><br>
+      • <b>Como vender:</b> Vídeos curtos no Instagram/TikTok mostrando simulações interativas no navegador geram cliques rápidos e curiosidade.<br>
+      • <b>Margem:</b> Quase 90% líquida (custo apenas de plataforma de checkout como Kiwify/Hotmart).<br>
+      • <b>Ticket ideal:</b> R$ 97 no front-end com order bump de templates por R$ 47.`,
+  b2:`<b>2. Templates & Boilerplates Prontos (Para Desenvolvedores):</b><br>
+      • <b>O que é:</b> Repositório privado no GitHub com FastAPI + Docker + Pinecone + Autenticação JWT pronta para subir no ar.<br>
+      • <b>Por que compram:</b> Nenhum programador sênior quer perder 4 dias reconfigurando a mesma estrutura básica.<br>
+      • <b>Canal de venda:</b> Gumroad, GitHub Sponsors ou anúncios diretos no Twitter/X.`,
+  b3:`<b>3. Consultoria de RAG B2B (Alto Ticket):</b><br>
+      • <b>O cliente:</b> Médias empresas, imobiliárias, escritórios contábeis e jurídicos com milhares de documentos desorganizados.<br>
+      • <b>Proposta:</b> <i>"Encontre qualquer cláusula em 3 segundos sem risco de vazamento de dados na internet."</i><br>
+      • <b>Contrato:</b> 50% de entrada + 50% na homologação (R$ 15.000 a R$ 35.000).`,
+  b4:`<b>4. Agentes Autônomos em Regime Recorrente (MRR):</b><br>
+      • <b>O cliente:</b> Clínicas médicas ou e-commerces precisando de triagem de WhatsApp 24/7.<br>
+      • <b>A mágica:</b> O cliente paga uma mensalidade fixa (R$ 3.000 a R$ 6.000/mês) para você manter os agentes rodando, monitorando drifts e atualizando ferramentas.`
+};
+['b1','b2','b3','b4'].forEach(id=>{
+  $(id).onclick=()=>{
+    ['b1','b2','b3','b4'].forEach(x=>$(x).classList.remove('selected'));
+    $(id).classList.add('selected');
+    $('bizDetail').innerHTML=bizInfo[id];
+    complete('m1',35,'Mapeou os 4 Canais de Faturamento!','m2');
+  };
+});
+
+/* ===== MISSÃO 2: Calculadora B2B ===== */
+function calcBudget(){
+  let total=0, days=7;
+  if($('scRag').checked){total+=12000;days+=7;}
+  if($('scGuard').checked){total+=4000;days+=3;}
+  if($('scAgent').checked){total+=8000;days+=7;}
+  if($('scDocker').checked){total+=6000;days+=4;}
+  
+  $('valTotal').textContent='R$ '+total.toLocaleString('pt-BR');
+  $('valPrazo').textContent=Math.round(days/7)+' a '+(Math.round(days/7)+1)+' semanas';
+}
+['scRag','scGuard','scAgent','scDocker'].forEach(id=>$(id).onchange=calcBudget);
+$('btnLockProposal').onclick=()=>{
+  complete('m2',40,'Proposta Comercial B2B Estruturada!','m3');
+};
+calcBudget();
+
+/* ===== MISSÃO 3: Learn in Public ===== */
+$('btnLearnPublic').onclick=()=>{
+  complete('m3',35,'Dominou o Funil Learn in Public!','m4');
+  startCumulativeQuiz();
+};
+
+/* ===== MISSÃO 4: GRANDE EXAME CUMULATIVO (AULAS 1 A 9) ===== */
+const cumulativeQuestions=[
+  {
+    origin: "Aulas 1 e 2 • O Neurônio e Ativações",
+    q: "1. No processo de aprendizado de um neurônio artificial, por que não podemos usar apenas somas lineares simples e precisamos de funções de ativação como a ReLU?",
+    options: [
+      {t: "Porque sem funções de ativação não-lineares, mesmo uma rede com 100 camadas continuaria equivalente a apenas uma linha reta, incapaz de aprender círculos, curvas ou lógica complexa.", correct: true, f: "Perfeito! A não-linearidade é o que permite à rede neural dobrar o espaço matemático e aprender formatos complexos."},
+      {t: "Porque o computador não sabe somar números decimais.", correct: false, f: "Computadores realizam bilhões de somas de ponto flutuante por segundo."},
+      {t: "Para desligar a internet durante o treinamento.", correct: false, f: "Totalmente incorreto."},
+      {t: "Para obrigar todos os pesos a serem negativos.", correct: false, f: "Pesos podem ser positivos ou negativos."}
+    ]
+  },
+  {
+    origin: "Aula 4 • Visão Computacional (CNNs)",
+    q: "2. Como as Redes Convolucionais conseguem identificar um gato em uma foto em alta resolução sem sobrecarregar a memória com bilhões de parâmetros?",
+    options: [
+      {t: "Elas transformam a foto em um arquivo de áudio.", correct: false, f: "Imagens permanecem no domínio visual/matriz de pixels."},
+      {t: "Usam filtros pequenos (ex: 3x3) que varrem a imagem procurando traços locais (bordas, curvas) e aplicam Max Pooling para reduzir o tamanho preservando os sinais mais fortes.", correct: true, f: "Excelente recordação! A combinação de convolução local + pooling é o segredo do sucesso das CNNs desde a AlexNet."},
+      {t: "Elas deletam 95% dos pixels aleatoriamente antes do treino.", correct: false, f: "Deleção aleatória destruiria as formas do objeto."},
+      {t: "Ouvindo o miado gravado no arquivo JPEG.", correct: false, f: "Arquivos de imagem padrão não têm áudio embutido."}
+    ]
+  },
+  {
+    origin: "Aula 5 • Transformers & LLMs",
+    q: "3. Uma empresa contratou você para configurar um bot que gera notas fiscais e cálculos contábeis. Qual configuração de TEMPERATURA você deve aplicar no LLM e por quê?",
+    options: [
+      {t: "Temperatura alta (1.6), para dar um tom poético e criativo aos números.", correct: false, f: "Isso geraria alucinações matemáticas graves e erros de imposto."},
+      {t: "Temperatura quase zero (0.0 a 0.2), para que o modelo seja determinístico, focado e escolha sempre os tokens de maior probabilidade, eliminando invenções.", correct: true, f: "Corretíssimo! Cálculos, código e dados fiscais exigem baixa temperatura (determinismo total)."},
+      {t: "Temperatura de 100 graus Celsius para aquecer o processador.", correct: false, f: "Temperatura no LLM é um hiperparâmetro estatístico de Softmax, não temperatura térmica de hardware."},
+      {t: "Desligar o tokenizador.", correct: false, f: "Sem tokenizador o modelo não consegue processar nenhum texto."}
+    ]
+  },
+  {
+    origin: "Aula 6 • RAG & Bancos Vetoriais",
+    q: "4. Ao criar um sistema RAG para analisar contratos imobiliários, por que o 'Chunk Overlap' (sobreposição entre pedaços) é considerado um requisito obrigatório?",
+    options: [
+      {t: "Para deixar o arquivo do banco de dados 10 vezes maior de propósito.", correct: false, f: "O objetivo é integridade de informação, não inchaço desnecessário."},
+      {t: "Para evitar que frases cruciais (como 'multa rescisória de R$ 50.000 em caso de atraso') sejam cortadas exatamente na metade entre dois chunks, fazendo a IA perder o contexto da regra.", correct: true, f: "Exato! O overlap garante continuidade semântica na fronteira dos pedaços."},
+      {t: "Para traduzir o contrato para mandarim.", correct: false, f: "Overlap é técnica de particionamento de texto, não tradução."},
+      {t: "Porque os bancos vetoriais só aceitam arquivos duplicados.", correct: false, f: "Bancos vetoriais trabalham com vetores únicos por chunk."}
+    ]
+  },
+  {
+    origin: "Aula 7 • Agentes Autônomos (ReAct)",
+    q: "5. No framework ReAct (Reason + Act), quando um agente autônomo percebe que precisa consultar o saldo de um cliente, qual é o fluxo exato de execução?",
+    options: [
+      {t: "Ele chuta um valor da cabeça e envia diretamente para o cliente.", correct: false, f: "Isso é alucinação de chatbot passivo, o oposto de um agente."},
+      {t: "Pensamento (raciocina que precisa do saldo) ➔ Ação (gera JSON chamando a ferramenta consultar_saldo(id)) ➔ Observação (lê o retorno real do banco de dados) ➔ Resposta fundamentada.", correct: true, f: "Brilhante! Esse é o clássico loop de raciocínio e ação com ferramentas que dá autonomia real aos agentes."},
+      {t: "Ele pede para o usuário humano abrir o banco de dados e digitar a resposta.", correct: false, f: "O propósito do agente é executar a tarefa de ponta a ponta sem atrito humano."},
+      {t: "Ele reinicia o servidor web.", correct: false, f: "Reiniciar não executa a consulta de negócio."}
+    ]
+  },
+  {
+    origin: "Aula 8 • MLOps e Deploy",
+    q: "6. Como você explica para um cliente empresarial que aplicar Quantização (de FP32 para INT8/INT4) no modelo dele é uma decisão segura e altamente econômica?",
+    options: [
+      {t: "Dizendo que o modelo perderá 80% da inteligência, mas a empresa economizará energia.", correct: false, f: "Com AWQ/GPTQ modernos a perda de acurácia costuma ser menor que 1-2%."},
+      {t: "Demonstrando que a quantização reduz o tamanho em memória dos pesos matemáticos, permitindo rodar em servidores que custam uma fração do preço com impacto imperceptível na qualidade final.", correct: true, f: "Nota 10! Essa é a justificativa técnica e financeira exata que diretores de tecnologia (CTOs) adoram ouvir."},
+      {t: "Afirmando que quantização é uma palavra mágica sem impacto prático.", correct: false, f: "Apresentar números de economia de VRAM é o que fecha o projeto."},
+      {t: "Prometendo que o modelo nunca mais precisará de energia elétrica.", correct: false, f: "Servidores em nuvem sempre demandam energia e refrigeração."}
+    ]
+  },
+  {
+    origin: "Aula 9 • Vendas e Monetização",
+    q: "7. Ao abordar sua primeira média empresa para vender uma consultoria de IA, qual é a abordagem mais convincente para fechar o contrato?",
+    options: [
+      {t: "Tentar vender 'Inteligência Artificial' como uma moda abstrata sem promessa de economia.", correct: false, f: "Empresas não compram tecnologia pela moda, compram para economizar tempo ou aumentar faturamento."},
+      {t: "Apresentar uma dor de negócio específica (ex: 'Sua equipe gasta 30h semanais respondendo as mesmas dúvidas em PDFs de fornecedores') e mostrar um protótipo funcional resolvendo exatamente essa dor com métricas de ROI.", correct: true, f: "Gabarito absoluto! O cliente não compra 'Machine Learning', ele compra a eliminação de um gargalo que custa tempo e dinheiro."},
+      {t: "Mandar um link com 500 páginas de fórmulas matemáticas de álgebra linear.", correct: false, f: "Isso assusta e afasta qualquer tomador de decisão corporativo."},
+      {t: "Fazer o projeto inteiro de graça para sempre sem assinar nenhum contrato.", correct: false, f: "Isso desvaloriza seu trabalho técnico de alto nível."}
+    ]
+  }
+];
+
+let curQ=0, cumScore=0;
+
+function startCumulativeQuiz(){
+  curQ=0; cumScore=0;
+  $('qScore').textContent='Pontos: 0';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=cumulativeQuestions[curQ];
+  $('qBadge').textContent=q.origin;
+  $('qNumber').textContent=`Questão ${curQ+1} de ${cumulativeQuestions.length}`;
+  $('qText').textContent=q.q;
+  $('qFeedback').classList.add('hidden');
+  $('qNext').classList.add('hidden');
+  
+  const container=$('qOptions');
+  container.innerHTML='';
+  
+  q.options.forEach((opt)=>{
+    const btn=document.createElement('button');
+    btn.className='quiz-option';
+    btn.textContent=opt.t;
+    btn.onclick=()=>selectAnswer(btn, opt);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(selectedBtn, opt){
+  const allBtns=document.querySelectorAll('.quiz-option');
+  allBtns.forEach(b=>b.disabled=true);
+  
+  const fb=$('qFeedback');
+  fb.classList.remove('hidden');
+  
+  if(opt.correct){
+    selectedBtn.classList.add('correct');
+    fb.style.background='#143825';
+    fb.style.border='1px solid var(--ok)';
+    fb.style.color='#86efac';
+    fb.innerHTML='<b>✅ Corretíssimo!</b> '+opt.f;
+    cumScore+=15;
+    $('qScore').textContent='Pontos: '+cumScore;
+  } else {
+    selectedBtn.classList.add('incorrect');
+    fb.style.background='#38161c';
+    fb.style.border='1px solid var(--err)';
+    fb.style.color='#fca5a5';
+    fb.innerHTML='<b>❌ Atenção ao Conceito:</b> '+opt.f;
+    const q=cumulativeQuestions[curQ];
+    const correctIdx=q.options.findIndex(x=>x.correct);
+    allBtns[correctIdx].classList.add('correct');
+  }
+  
+  $('qNext').classList.remove('hidden');
+}
+
+$('qNext').onclick=()=>{
+  curQ++;
+  if(curQ < cumulativeQuestions.length){
+    renderQuestion();
+  } else {
+    complete('m4',80,'Gabaritou o Grande Exame Cumulativo!','endCard');
+  }
+};
+
+$('btnFinalCert').onclick=()=>{
+  alert('🎓 Parabéns! Você concluiu com excelência a Trilha Técnica e Comercial de IA!\nTodos os arquivos HTML e códigos continuam salvos na sua máquina para você revisar, personalizar e empacotar no seu próprio curso ou negócio.');
+};
+</script>
+</body>
+</html>

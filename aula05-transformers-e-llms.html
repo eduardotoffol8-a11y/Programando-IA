@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 5 — A Mágica dos Transformers & LLMs (Por Dentro do ChatGPT e Gemini)</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--a:#38bdf8;--b:#f472b6;--y:#facc15;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--txt)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:10;border-bottom:1px solid #2a3050}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  main{max-width:1040px;margin:auto;padding:20px}
+  .card{background:var(--card);border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 4px 20px #0005}
+  .mission{border-left:5px solid var(--acc)}
+  .mission.done{border-left-color:var(--ok)}
+  .mission h3{margin:0 0 8px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;background:#2a3050;font-size:.8rem;margin-left:6px}
+  button{background:var(--acc);color:#fff;border:0;padding:10px 16px;border-radius:10px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0;font-weight:600}
+  button:hover{filter:brightness(1.15)}
+  button.sec{background:#2a3050}
+  .row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .tip{background:#22284a;padding:12px 16px;border-radius:10px;margin-top:12px;font-size:.95rem;line-height:1.5}
+  .hidden{display:none}
+  .mono{font-family:Consolas,monospace;background:#0b0e1a;padding:12px;border-radius:10px;line-height:1.6;font-size:.92rem}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:12px 22px;border-radius:12px;font-weight:700;transition:transform .4s;z-index:99}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .token-pill{display:inline-block;padding:3px 8px;margin:3px;border-radius:6px;font-weight:600;font-size:14px;border:1px solid #ffffff22}
+  canvas{background:#0b0e1a;border-radius:12px}
+  .quiz button{display:block;width:100%;text-align:left;background:#2a3050;margin-bottom:8px}
+  .quiz button.right{background:var(--ok);color:#052e16}
+  .quiz button.wrong{background:#ef4444}
+  input[type=range]{width:100%}
+  input[type=text]{background:#0b0e1a;color:#fff;border:1px solid #3b4268;padding:8px 12px;border-radius:8px;font-size:1rem;width:100%}
+</style>
+</head>
+<body>
+<header>
+  <b>🤖 Academia IA — Aula 5: Transformers & LLMs</b>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="lvl">Nível 1</span>
+    <div class="xpbar"><div class="xpfill" id="xp"></div></div>
+    <span id="xpt">0 XP</span>
+  </div>
+</header>
+<main>
+
+<div class="card">
+  <h2>A Mágica por Trás do ChatGPT e Gemini ⏱️ 14 min</h2>
+  <p>Modelos de Linguagem Grandes (<b>LLMs</b>) parecem mágica, mas são baseados em uma arquitetura revolucionária criada em 2017: o <b>Transformer</b>.<br>
+  Hoje você vai ver como o computador transforma palavras em matemática, conecta o contexto com <b>Atenção (Self-Attention)</b> e adivinha a próxima palavra!</p>
+</div>
+
+<!-- MISSÃO 1 -->
+<div class="card mission" id="m1">
+  <h3>✂️ Missão 1 — O Fatiador de Tokens (Tokenização) <span class="badge">+30 XP</span></h3>
+  <p>Computadores não leem letras nem palavras inteiras. Eles cortam o texto em pedaços chamados <b>Tokens</b> e dão um número (ID) para cada um.<br>
+  Digite qualquer frase abaixo ou teste os botões rápidos:</p>
+  <div style="margin-bottom:10px">
+    <button class="sec" id="tokEx1">"Inteligência Artificial é incrível"</button>
+    <button class="sec" id="tokEx2">"Desconstitucionalissimamente"</button>
+    <button class="sec" id="tokEx3">"def aprender_ia(foco=True):"</button>
+  </div>
+  <input type="text" id="tokInput" value="Inteligência Artificial é incrível">
+  <div style="margin-top:14px">
+    <b>Como a IA enxerga o texto dividido em Tokens:</b>
+    <div id="tokenOutput" style="margin-top:8px;min-height:45px"></div>
+    <div class="mono" id="tokenIds" style="margin-top:8px;color:#a5f3fc">IDs Numéricos: [ ... ]</div>
+  </div>
+  <div class="tip">💡 1 token equivale a cerca de <b>4 letras</b> ou 0.75 palavras em inglês. No português, palavras longas viram múltiplos tokens. É por isso que você paga por <i>tokens</i> nas APIs da OpenAI e Google!</div>
+</div>
+
+<!-- MISSÃO 2 -->
+<div class="card mission hidden" id="m2">
+  <h3>🧭 Missão 2 — O Mapa Semântico (Embeddings) <span class="badge">+35 XP</span></h3>
+  <p>Depois de fatiar os tokens, a IA transforma cada um em um <b>Vetor (uma lista de coordenadas no espaço)</b>.<br>
+  Palavras com significados parecidos ficam vizinhas no mapa. Clique nas palavras para ver as relações e a famosa <b>Álgebra de Palavras</b>:</p>
+  <div class="row">
+    <canvas id="embCanvas" width="480" height="340"></canvas>
+    <div style="flex:1;min-width:260px">
+      <div style="margin-bottom:10px">
+        <button class="sec" id="btnClustAnimals">🐾 Animais</button>
+        <button class="sec" id="btnClustTech">💻 Tecnologia</button>
+        <button class="sec" id="btnClustRoyalty">👑 Realeza</button>
+      </div>
+      <div class="mono" id="embMath" style="min-height:90px;color:#fef08a">
+        Clique no botão abaixo para ver a equação mais famosa da história da IA moderna:
+      </div>
+      <button id="runVecMath">⚡ Calcular: Rei - Homem + Mulher</button>
+      <div class="tip">💡 Se você pegar as coordenadas de <b>Rei</b>, subtrair o vetor de <b>Homem</b> e somar <b>Mulher</b>, a resposta matemática exata é <b>Rainha</b>! É assim que a IA entende conceitos.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 3 -->
+<div class="card mission hidden" id="m3">
+  <h3>👀 Missão 3 — O Mecanismo de Atenção (Self-Attention) <span class="badge">+35 XP</span></h3>
+  <p>Como a IA sabe o significado de palavras com duplo sentido? Veja a palavra <b>"banco"</b> nas duas frases abaixo e <b>clique sobre ela</b>:</p>
+  <div class="row" style="margin-bottom:12px">
+    <button class="sec att-btn" data-sent="1">Frase 1: "O banco bloqueou o meu cartão de crédito."</button>
+    <button class="sec att-btn" data-sent="2">Frase 2: "Ele sentou no banco da praça para descansar."</button>
+  </div>
+  <canvas id="attCanvas" width="760" height="200" style="width:100%;max-width:760px"></canvas>
+  <div class="tip" id="attDesc">👆 Clique em uma das frases acima para ver os feixes de atenção se conectarem!</div>
+</div>
+
+<!-- MISSÃO 4 -->
+<div class="card mission hidden" id="m4">
+  <h3>🎲 Missão 4 — Gerando Texto: Previsão & Temperatura <span class="badge">+35 XP</span></h3>
+  <p>Um LLM é essencialmente uma máquina de adivinhar o <b>próximo token</b> com base em probabilidades. A <b>Temperatura</b> controla o quanto ele arrisca:</p>
+  <div style="background:#0b0e1a;padding:14px;border-radius:10px;font-size:1.1rem;margin-bottom:12px">
+    Prompt: <i>"O céu durante a noite de verão é cheio de..."</i>
+  </div>
+  <div class="row">
+    <div style="flex:1;min-width:280px">
+      <label><b>Temperatura: <span id="tempVal" style="color:var(--y)">0.7</span></b> (<span id="tempDesc">Equilibrada</span>)</label>
+      <input type="range" id="tempSlider" min="0.1" max="1.8" step="0.1" value="0.7">
+      <button id="genToken" style="margin-top:14px">🎲 Gerar Próxima Palavra</button>
+      <div class="mono" id="genResult" style="margin-top:10px;font-size:1.1rem;color:#38bdf8">
+        Clique no botão acima para sortear o próximo token!
+      </div>
+    </div>
+    <div style="flex:1;min-width:280px">
+      <b>Probabilidades Calculadas pela IA:</b>
+      <div id="probBars" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div class="tip">💡 <b>Temperatura Baixa (0.1):</b> Escolhe sempre o #1 mais provável (ótimo para código e matemática).<br><b>Temperatura Alta (1.2+):</b> Dá chance a palavras raras (ótimo para poemas e criatividade, mas pode inventar coisas / alucinar!).</div>
+</div>
+
+<!-- QUIZ -->
+<div class="card mission hidden quiz" id="m5">
+  <h3>🏆 Desafio Final da Aula 5 <span class="badge">+50 XP</span></h3>
+  <p id="qq"></p><div id="qa"></div>
+</div>
+
+<div class="card hidden" id="end">
+  <h2>🎉 Sensacional! Você desvendou o segredo dos Transformers & LLMs!</h2>
+  <p>Olha o que você aprendeu hoje:</p>
+  <ul>
+    <li>✅ <b>Tokenização:</b> Como palavras viram fatias e números identificadores.</li>
+    <li>✅ <b>Embeddings:</b> O espaço geométrico onde significado vira matemática vetorial.</li>
+    <li>✅ <b>Self-Attention:</b> Como a IA conecta palavras distantes para entender o contexto real.</li>
+    <li>✅ <b>Next-Token + Temperatura:</b> A engrenagem probabilística que gera respostas inteligentes.</li>
+  </ul>
+  <div class="tip">💼 <b>Como Vender Esse Conhecimento:</b> Empresas não contratam quem sabe só "usar o chat". Elas pagam caro para quem entende como ajustar temperatura, criar prompts estruturados (JSON), usar embeddings para <b>RAG (busca em documentos da empresa)</b> e criar <b>Agentes Autônomos</b>.</div>
+  <p>➡️ Próxima parada: <b>Aula 6 — RAG & Bancos Vetoriais (Como fazer a IA consultar PDFs e dados privados sem alucinar!)</b></p>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let xp=0,done={};
+function gain(n,m){
+  xp+=n;
+  $('xp').style.width=Math.min(100,xp/185*100)+'%';
+  $('xpt').textContent=xp+' XP';
+  $('lvl').textContent='Nível '+(1+Math.floor(xp/60));
+  const t=$('toast');t.textContent=m+'  +'+n+' XP';t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+function complete(id,n,m,next){
+  if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,m);
+  if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),450);}
+}
+
+/* ===== MISSÃO 1: Tokenizer ===== */
+const colors=['#38bdf8','#f472b6','#facc15','#4ade80','#a78bfa','#fb923c','#2dd4bf'];
+function tokenize(text){
+  // Heurística visual simples para simular Byte-Pair Encoding
+  const words=text.split(/(\s+|[.,!?:;(){}[\]=])/g).filter(x=>x);
+  const tokens=[];
+  words.forEach(w=>{
+    if(w.length>7 && !w.startsWith('http')){
+      const mid=Math.floor(w.length/2);
+      tokens.push(w.slice(0,mid));
+      tokens.push(w.slice(mid));
+    }else{
+      tokens.push(w);
+    }
+  });
+  return tokens;
+}
+function updateTokens(){
+  const val=$('tokInput').value;
+  const tokens=tokenize(val);
+  const out=$('tokenOutput');
+  out.innerHTML='';
+  const ids=[];
+  tokens.forEach((t,i)=>{
+    const span=document.createElement('span');
+    span.className='token-pill';
+    const c=colors[i%colors.length];
+    span.style.background=c+'25';
+    span.style.color=c;
+    span.textContent=t===' '?'␣ (espaço)':t;
+    out.appendChild(span);
+    // Hash determinístico simples para simular ID do token
+    let hash=0;
+    for(let c=0;c<t.length;c++)hash=(hash*31+t.charCodeAt(c))%80000+1000;
+    ids.push(hash);
+  });
+  $('tokenIds').textContent='IDs Numéricos: ['+ids.join(', ')+']';
+  if(tokens.length>=3)complete('m1',30,'Desvendou a Tokenização!','m2');
+}
+$('tokInput').oninput=updateTokens;
+$('tokEx1').onclick=()=>{$('tokInput').value="Inteligência Artificial é incrível";updateTokens();};
+$('tokEx2').onclick=()=>{$('tokInput').value="Desconstitucionalissimamente";updateTokens();};
+$('tokEx3').onclick=()=>{$('tokInput').value="def aprender_ia(foco=True):";updateTokens();};
+updateTokens();
+
+/* ===== MISSÃO 2: Embeddings Canvas ===== */
+const ec=$('embCanvas'),ex=ec.getContext('2d');
+const wordsMap=[
+  {w:'Cachorro',x:90,y:90,cat:'anim'},
+  {w:'Gato',x:130,y:110,cat:'anim'},
+  {w:'Lobo',x:80,y:140,cat:'anim'},
+  {w:'Computador',x:370,y:80,cat:'tech'},
+  {w:'Software',x:400,y:120,cat:'tech'},
+  {w:'Internet',x:340,y:130,cat:'tech'},
+  {w:'Rei',x:160,y:260,cat:'roy'},
+  {w:'Homem',x:120,y:290,cat:'roy'},
+  {w:'Mulher',x:280,y:290,cat:'roy'},
+  {w:'Rainha',x:320,y:260,cat:'roy'}
+];
+function drawEmbeddings(highlight=null,vecArrow=null){
+  ex.clearRect(0,0,480,340);
+  // Grid sutil de coordenadas
+  ex.strokeStyle='#1e293b';ex.lineWidth=1;
+  for(let x=0;x<480;x+=60){ex.beginPath();ex.moveTo(x,0);ex.lineTo(x,340);ex.stroke();}
+  for(let y=0;y<340;y+=60){ex.beginPath();ex.moveTo(0,y);ex.lineTo(480,y);ex.stroke();}
+  
+  if(vecArrow){
+    // Desenha vetor rei -> homem -> mulher -> rainha
+    ex.strokeStyle='#facc15';ex.lineWidth=3;ex.setLineDash([5,5]);
+    ex.beginPath();ex.moveTo(160,260);ex.lineTo(120,290);ex.stroke();
+    ex.strokeStyle='#f472b6';
+    ex.beginPath();ex.moveTo(120,290);ex.lineTo(280,290);ex.stroke();
+    ex.strokeStyle='#22c55e';
+    ex.beginPath();ex.moveTo(280,290);ex.lineTo(320,260);ex.stroke();
+    ex.setLineDash([]);
+  }
+
+  wordsMap.forEach(item=>{
+    const isHl=highlight===item.cat||highlight===item.w;
+    ex.fillStyle=item.cat==='anim'?'#38bdf8':item.cat==='tech'?'#a78bfa':'#facc15';
+    ex.beginPath();ex.arc(item.x,item.y,isHl?9:6,0,7);ex.fill();
+    ex.fillStyle=isHl?'#fff':'#94a3b8';
+    ex.font=isHl?'bold 13px sans-serif':'12px sans-serif';
+    ex.fillText(item.w,item.x+10,item.y+4);
+  });
+}
+$('btnClustAnimals').onclick=()=>drawEmbeddings('anim');
+$('btnClustTech').onclick=()=>drawEmbeddings('tech');
+$('btnClustRoyalty').onclick=()=>drawEmbeddings('roy');
+$('runVecMath').onclick=()=>{
+  drawEmbeddings(null,true);
+  $('embMath').innerHTML=`Vetor(<b>Rei</b>) [0.82, 0.45]<br>- Vetor(<b>Homem</b>) [0.60, 0.40]<br>+ Vetor(<b>Mulher</b>) [0.15, 0.90]<br>= <b>Vetor(Rainha)</b> [0.37, 0.95] ✅`;
+  complete('m2',35,'Mestre da Geometria Semântica!','m3');
+};
+drawEmbeddings();
+
+/* ===== MISSÃO 3: Self-Attention ===== */
+const ac=$('attCanvas'),ax=ac.getContext('2d');
+const sentences={
+  1:{
+    words:['O','banco','bloqueou','o','meu','cartão','de','crédito.'],
+    targetIdx:1,
+    links:[{to:2,w:0.85},{to:5,w:0.95},{to:7,w:0.75}] // banco se liga a bloqueou e cartão de crédito
+  },
+  2:{
+    words:['Ele','sentou','no','banco','da','praça','para','descansar.'],
+    targetIdx:3,
+    links:[{to:1,w:0.9},{to:5,w:0.95},{to:7,w:0.8}] // banco se liga a sentou e praça
+  }
+};
+function drawAttention(sId){
+  ax.clearRect(0,0,760,200);
+  const s=sentences[sId];
+  const step=760/(s.words.length+1);
+  const yWords=150, yTarget=150;
+  
+  // Desenha os feixes de atenção curvos
+  const tx=step*(s.targetIdx+1);
+  s.links.forEach(link=>{
+    const lx=step*(link.to+1);
+    ax.strokeStyle=`rgba(244, 114, 182, ${link.w})`;
+    ax.lineWidth=link.w*5;
+    ax.beginPath();
+    ax.moveTo(tx,yWords-15);
+    ax.bezierCurveTo(tx,(yWords-90)*link.w, lx,(yWords-90)*link.w, lx,yWords-15);
+    ax.stroke();
+    // Peso da atenção
+    ax.fillStyle='#facc15';ax.font='11px sans-serif';
+    ax.fillText((link.w*100).toFixed(0)+'%',(tx+lx)/2,yWords-70*link.w);
+  });
+
+  // Desenha as palavras
+  s.words.forEach((w,i)=>{
+    const x=step*(i+1);
+    const isTarget=i===s.targetIdx;
+    ax.fillStyle=isTarget?'#f472b6':'#e5e7eb';
+    ax.font=isTarget?'bold 16px sans-serif':'14px sans-serif';
+    ax.textAlign='center';
+    ax.fillText(w,x,yWords);
+    ax.fillStyle=isTarget?'#f472b6':'#334155';
+    ax.beginPath();ax.arc(x,yWords+12,isTarget?6:4,0,7);ax.fill();
+  });
+  ax.textAlign='left';
+}
+document.querySelectorAll('.att-btn').forEach(b=>{
+  b.onclick=()=>{
+    const sId=b.dataset.sent;
+    document.querySelectorAll('.att-btn').forEach(x=>x.className='sec att-btn');
+    b.className='att-btn';
+    drawAttention(sId);
+    $('attDesc').innerHTML=sId==='1'?
+      '💡 <b>Na Frase 1:</b> A palavra <code>banco</code> distribui atenção máxima para <b>cartão (95%)</b> e <b>bloqueou (85%)</b>. Assim a IA sabe que se trata de uma instituição financeira!':
+      '💡 <b>Na Frase 2:</b> A palavra <code>banco</code> conecta sua atenção a <b>praça (95%)</b> e <b>sentou (90%)</b>. A IA entende instantaneamente que se trata de um assento!';
+    complete('m3',35,'Entendeu o Mecanismo de Atenção!','m4');
+  };
+});
+drawAttention(1);
+
+/* ===== MISSÃO 4: Next-Token & Temperatura ===== */
+const candidates=[
+  {word:'estrelas',base:65},
+  {word:'vagalumes',base:15},
+  {word:'mistérios',base:12},
+  {word:'satélites',base:6},
+  {word:'bananas',base:2}
+];
+function updateProbs(){
+  const T=+$('tempSlider').value;
+  $('tempVal').textContent=T.toFixed(1);
+  $('tempDesc').textContent=T<=0.3?'Determinista / Focado':T<=0.9?'Equilibrado / Natural':'Criativo / Caótico';
+  
+  // Softmax com temperatura: exp(logit / T)
+  const expScores=candidates.map(c=>Math.exp((c.base/10)/T));
+  const sumExp=expScores.reduce((a,b)=>a+b,0);
+  const probs=expScores.map(s=>(s/sumExp)*100);
+  
+  const container=$('probBars');
+  container.innerHTML='';
+  candidates.forEach((c,i)=>{
+    const p=probs[i];
+    const row=document.createElement('div');
+    row.style.marginBottom='8px';
+    row.innerHTML=`
+      <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:2px">
+        <span><b>${c.word}</b></span>
+        <span>${p.toFixed(1)}%</span>
+      </div>
+      <div style="background:#0b0e1a;height:8px;border-radius:4px;overflow:hidden">
+        <div style="width:${p}%;height:100%;background:${i===0?'#22c55e':'#7c5cff'}"></div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+  return probs;
+}
+$('tempSlider').oninput=updateProbs;
+updateProbs();
+
+$('genToken').onclick=()=>{
+  const probs=updateProbs();
+  // Sorteio ponderado
+  const r=Math.random()*100;
+  let acc=0, chosen=candidates[0].word;
+  for(let i=0;i<probs.length;i++){
+    acc+=probs[i];
+    if(r<=acc){chosen=candidates[i].word;break;}
+  }
+  $('genResult').innerHTML=`Palavra gerada: <b style="color:#facc15;font-size:1.3rem">"${chosen}"</b>`;
+  complete('m4',35,'Mestre do Gerador de Texto!','m5');
+  quiz();
+};
+
+/* ===== QUIZ ===== */
+const Q=[
+  ["O que são Tokens em um LLM?",["Pedaços de texto (palavras ou pedaços de palavras) convertidos em IDs numéricos","Vírus de computador","Senhas de acesso"],0],
+  ["Para que serve o mecanismo de Self-Attention (Atenção)?",["Para apagar palavras difíceis","Para a IA conectar cada palavra às outras relevantes da frase, entendendo o contexto","Para fazer o chat responder mais devagar"],1],
+  ["O que acontece quando você aumenta a Temperatura de um LLM para um valor alto (ex: 1.4)?",["O modelo desliga sozinho","O modelo fica mais criativo e arrisca palavras menos prováveis (podendo alucinar)","O modelo só responde com números"],1]
+];
+let qi=0;
+function quiz(){
+  if(qi>=Q.length){complete('m5',50,'Mestre da Aula 5!','end');return;}
+  const [q,ops,r]=Q[qi];
+  $('qq').textContent=`Pergunta ${qi+1}/${Q.length}: ${q}`;
+  $('qa').innerHTML='';
+  ops.forEach((o,i)=>{
+    const bt=document.createElement('button');bt.textContent=o;
+    bt.onclick=()=>{if(i===r){bt.className='right';qi++;setTimeout(quiz,700);}else bt.className='wrong';};
+    $('qa').appendChild(bt);
+  });
+}
+</script>
+</body>
+</html>

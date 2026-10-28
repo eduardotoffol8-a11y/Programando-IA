@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 1 — Como uma máquina aprende?</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--a:#38bdf8;--b:#f472b6;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--txt)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:5}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  main{max-width:980px;margin:auto;padding:20px}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 4px 20px #0005}
+  .mission{border-left:5px solid var(--acc)}
+  .mission.done{border-left-color:var(--ok);opacity:.85}
+  .mission h3{margin:0 0 6px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;background:#2a3050;font-size:.8rem;margin-right:6px}
+  button{background:var(--acc);color:#fff;border:0;padding:10px 16px;border-radius:10px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0}
+  button:hover{filter:brightness(1.15)} button.sec{background:#2a3050}
+  .row{display:flex;gap:18px;flex-wrap:wrap}
+  canvas{background:#0b0e1a;border-radius:12px;cursor:crosshair;touch-action:none}
+  .stat{font-size:2rem;font-weight:700}
+  .tip{background:#22284a;padding:10px 14px;border-radius:10px;margin-top:10px;font-size:.95rem}
+  .hidden{display:none}
+  input[type=range]{width:100%}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:12px 22px;border-radius:12px;font-weight:700;transition:transform .4s;z-index:9}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .quiz button{display:block;width:100%;text-align:left;background:#2a3050}
+  .quiz button.right{background:var(--ok)} .quiz button.wrong{background:#ef4444}
+</style>
+</head>
+<body>
+<header>
+  <b>🧠 Academia IA — Aula 1</b>
+  <div style="display:flex;align-items:center;gap:10px"><span id="lvl">Nível 1</span><div class="xpbar"><div class="xpfill" id="xp"></div></div><span id="xpt">0 XP</span></div>
+</header>
+<main>
+
+<div class="card">
+  <h2>Como uma máquina "aprende"? ⏱️ 10 min</h2>
+  <p>Sem teoria longa. Você vai <b>ensinar uma mini-IA</b> e ver ela aprender ao vivo. Cada missão leva menos de 2 minutos.</p>
+</div>
+
+<!-- MISSÃO 1 -->
+<div class="card mission" id="m1">
+  <h3>🎯 Missão 1 — Seja o professor <span class="badge">+20 XP</span></h3>
+  <p>IA aprende com <b>exemplos</b>. Clique no quadro para colocar pontos:<br>
+  <b style="color:var(--a)">Clique esquerdo = Azul</b> · <b style="color:var(--b)">Shift+clique (ou botão abaixo) = Rosa</b>.<br>
+  Coloque pelo menos <b>5 de cada cor</b>, azuis de um lado e rosas do outro.</p>
+  <div class="row">
+    <canvas id="cv" width="460" height="460"></canvas>
+    <div style="flex:1;min-width:240px">
+      <button id="colA">🔵 Pintando Azul</button><button class="sec" id="colB">🌸 Rosa</button>
+      <button class="sec" id="demo">✨ Gerar exemplo</button><button class="sec" id="clr">🗑️ Limpar</button>
+      <p>Azuis: <b id="na">0</b> · Rosas: <b id="nb">0</b></p>
+      <div class="tip">💡 Esses pontos são os <b>dados de treino</b>. Toda IA (até o ChatGPT) começa assim: exemplos com a resposta certa.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 2 -->
+<div class="card mission hidden" id="m2">
+  <h3>🤖 Missão 2 — Aperte "Aprender" <span class="badge">+30 XP</span></h3>
+  <p>A linha é o "cérebro" da IA: um <b>neurônio</b>. Ele começa chutando. A cada erro, ajusta um pouquinho a linha.</p>
+  <button id="train">▶️ Aprender</button><button class="sec" id="step">👣 1 passo</button><button class="sec" id="reset">🔄 Esquecer tudo</button>
+  <div class="row" style="margin-top:10px">
+    <div><div>Acerto</div><div class="stat" id="acc">0%</div></div>
+    <div><div>Rodadas (épocas)</div><div class="stat" id="ep">0</div></div>
+    <div><div>Pesos</div><div style="font-family:monospace" id="w">w1=0 w2=0 b=0</div></div>
+  </div>
+  <div class="tip">💡 O fundo colorido mostra o que a IA <b>acha</b> de cada região. Isso é uma <b>previsão</b>.</div>
+</div>
+
+<!-- MISSÃO 3 -->
+<div class="card mission hidden" id="m3">
+  <h3>🎛️ Missão 3 — Controle a velocidade do aprendizado <span class="badge">+20 XP</span></h3>
+  <p>A <b>taxa de aprendizado</b> diz o tamanho de cada correção. Clique em "Esquecer tudo", mude o valor e treine de novo.</p>
+  <input type="range" id="lr" min="0.001" max="1" step="0.001" value="0.1">
+  <p>Taxa: <b id="lrv">0.1</b> → <span id="lrtxt">equilibrada</span></p>
+  <div class="tip">💡 Muito baixa = aprende devagar. Muito alta = fica "pulando" e não acerta. Achar o equilíbrio é trabalho real de engenheiro de IA.</div>
+  <button id="m3ok">Entendi, testei! ✅</button>
+</div>
+
+<!-- MISSÃO 4 -->
+<div class="card mission hidden" id="m4">
+  <h3>😈 Missão 4 — Engane a IA <span class="badge">+30 XP</span></h3>
+  <p>Coloque alguns pontos <b>azuis no meio dos rosas</b> e treine de novo. O acerto chega em 100%?</p>
+  <div class="tip">💡 Um único neurônio só sabe desenhar <b>linhas retas</b>. Para formas complexas, empilhamos vários neurônios em camadas: isso é <b>Deep Learning</b> (Aula 3!).</div>
+  <button id="m4ok">Consegui enganar! 😎</button>
+</div>
+
+<!-- QUIZ -->
+<div class="card mission hidden quiz" id="m5">
+  <h3>🏆 Desafio final <span class="badge">+50 XP</span></h3>
+  <p id="qq"></p><div id="qa"></div>
+</div>
+
+<div class="card hidden" id="end">
+  <h2>🎉 Aula 1 concluída!</h2>
+  <p>Você acabou de entender o núcleo de TODA IA moderna:</p>
+  <ol>
+    <li><b>Dados</b> com exemplos → <b>Modelo</b> (pesos) → <b>Previsão</b></li>
+    <li>Mede o <b>erro</b> → ajusta os pesos com uma <b>taxa de aprendizado</b> → repete (<b>épocas</b>)</li>
+    <li>Modelos simples têm <b>limites</b> → por isso existem redes profundas</li>
+  </ol>
+  <p>➡️ Próxima: <b>Aula 2 — Escrevendo esse mesmo neurônio em Python (15 linhas)</b>.</p>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),S=460;
+let pts=[],color=1,w=[0,0],b=0,lr=0.1,epoch=0,timer=null,xp=0,done={};
+const $=id=>document.getElementById(id);
+
+function gain(n,msg){xp+=n;$('xp').style.width=Math.min(100,xp/180*100)+'%';$('xpt').textContent=xp+' XP';
+  $('lvl').textContent='Nível '+(1+Math.floor(xp/60));const t=$('toast');t.textContent=msg+'  +'+n+' XP';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+function complete(id,n,msg,next){if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,msg);if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),400);}}
+
+const pred=(x,y)=>w[0]*x+w[1]*y+b;
+function draw(){
+  const g=20;for(let i=0;i<S;i+=g)for(let j=0;j<S;j+=g){const v=pred(i/S*2-1,j/S*2-1);
+    ctx.fillStyle=(w[0]||w[1]||b)?(v>=0?'rgba(56,189,248,.18)':'rgba(244,114,182,.18)'):'#0b0e1a';ctx.fillRect(i,j,g,g);}
+  if(w[1]){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();
+    const yAt=x=>(-(w[0]*x+b)/w[1]+1)/2*S;ctx.moveTo(0,yAt(-1));ctx.lineTo(S,yAt(1));ctx.stroke();}
+  for(const p of pts){ctx.beginPath();ctx.arc((p.x+1)/2*S,(p.y+1)/2*S,7,0,7);ctx.fillStyle=p.c>0?'#38bdf8':'#f472b6';ctx.fill();ctx.strokeStyle='#fff';ctx.stroke();}
+  const na=pts.filter(p=>p.c>0).length;$('na').textContent=na;$('nb').textContent=pts.length-na;
+  const ok=pts.filter(p=>Math.sign(pred(p.x,p.y)||-1)===p.c).length;
+  $('acc').textContent=pts.length?Math.round(ok/pts.length*100)+'%':'0%';$('ep').textContent=epoch;
+  $('w').textContent=`w1=${w[0].toFixed(2)} w2=${w[1].toFixed(2)} b=${b.toFixed(2)}`;
+  if(na>=5&&pts.length-na>=5)complete('m1',20,'Dados prontos!','m2');
+  return pts.length?ok/pts.length:0;
+}
+cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect();
+  pts.push({x:(e.clientX-r.left)/r.width*2-1,y:(e.clientY-r.top)/r.height*2-1,c:e.shiftKey?-1:color});draw();});
+$('colA').onclick=()=>{color=1;$('colA').className='';$('colB').className='sec';};
+$('colB').onclick=()=>{color=-1;$('colB').className='';$('colA').className='sec';};
+$('clr').onclick=()=>{pts=[];draw();};
+$('demo').onclick=()=>{for(let i=0;i<10;i++){pts.push({x:Math.random()*.8-.9,y:Math.random()*1.8-.9,c:1});pts.push({x:Math.random()*.8+.1,y:Math.random()*1.8-.9,c:-1});}draw();};
+
+function stepOnce(){for(const p of pts){const out=pred(p.x,p.y)>=0?1:-1;if(out!==p.c){const e=p.c-out;w[0]+=lr*e*p.x;w[1]+=lr*e*p.y;b+=lr*e;}}epoch++;return draw();}
+$('step').onclick=stepOnce;
+$('train').onclick=()=>{if(timer)return;timer=setInterval(()=>{const a=stepOnce();
+  if(a===1||epoch%60===0){clearInterval(timer);timer=null;if(a>=.9)complete('m2',30,'Sua IA aprendeu!','m3');}},120);};
+$('reset').onclick=()=>{clearInterval(timer);timer=null;w=[0,0];b=0;epoch=0;draw();};
+$('lr').oninput=e=>{lr=+e.target.value;$('lrv').textContent=lr;$('lrtxt').textContent=lr<.02?'🐢 lenta':lr>.6?'🐇 agitada demais':'⚖️ equilibrada';};
+$('m3ok').onclick=()=>complete('m3',20,'Mestre da taxa!','m4');
+$('m4ok').onclick=()=>{complete('m4',30,'Hacker de IA!','m5');quiz();};
+
+const Q=[["O que a IA usa para aprender?",["Regras escritas à mão","Exemplos com respostas (dados)","Sorte"],1],
+ ["O que acontece quando a IA erra um ponto?",["Ela ajusta os pesos um pouco","Ela apaga os dados","Nada"],0],
+ ["Por que 1 neurônio não separa formas complexas?",["Falta internet","Ele só desenha linhas retas","Os pontos são feios"],1]];
+let qi=0;function quiz(){if(qi>=Q.length){complete('m5',50,'Aula concluída!','end');return;}
+  const [q,ops,r]=Q[qi];$('qq').textContent=`Pergunta ${qi+1}/3: ${q}`;$('qa').innerHTML='';
+  ops.forEach((o,i)=>{const bt=document.createElement('button');bt.textContent=o;bt.onclick=()=>{
+    if(i===r){bt.className='right';qi++;setTimeout(quiz,700);}else bt.className='wrong';};$('qa').appendChild(bt);});}
+draw();
+</script>
+</body>
+</html>

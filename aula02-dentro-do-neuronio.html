@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 2 — Dentro do Neurônio</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--a:#38bdf8;--b:#f472b6;--y:#facc15;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--txt)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:5}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  main{max-width:980px;margin:auto;padding:20px}
+  .card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:0 4px 20px #0005}
+  .mission{border-left:5px solid var(--acc)} .mission.done{border-left-color:var(--ok)}
+  .mission h3{margin:0 0 6px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;background:#2a3050;font-size:.8rem}
+  button{background:var(--acc);color:#fff;border:0;padding:10px 16px;border-radius:10px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0}
+  button:hover{filter:brightness(1.15)} button.sec{background:#2a3050}
+  .row{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+  canvas{background:#0b0e1a;border-radius:12px}
+  .tip{background:#22284a;padding:10px 14px;border-radius:10px;margin-top:10px;font-size:.95rem}
+  .hidden{display:none}
+  label{display:block;margin-top:8px;font-size:.9rem}
+  input[type=range]{width:100%}
+  .big{font-size:1.8rem;font-weight:700}
+  .mono{font-family:Consolas,monospace;background:#0b0e1a;padding:10px;border-radius:8px;line-height:1.7}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:12px 22px;border-radius:12px;font-weight:700;transition:transform .4s;z-index:9}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .quiz button{display:block;width:100%;text-align:left;background:#2a3050}
+  .quiz button.right{background:var(--ok)} .quiz button.wrong{background:#ef4444}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .compare div{background:#22284a;padding:12px;border-radius:10px}
+</style>
+</head>
+<body>
+<header>
+  <b>🧠 Academia IA — Aula 2</b>
+  <div style="display:flex;align-items:center;gap:10px"><span id="lvl">Nível 1</span><div class="xpbar"><div class="xpfill" id="xp"></div></div><span id="xpt">0 XP</span></div>
+</header>
+<main>
+
+<div class="card">
+  <h2>Dentro do Neurônio 🔬 ⏱️ 12 min</h2>
+  <p>Na Aula 1 você viu a IA aprender. Agora vamos <b>abrir a caixa</b>: o que existe dentro de um neurônio e como ele descobre que errou.</p>
+  <div class="compare">
+    <div>🧬 <b>Neurônio do cérebro</b><br>Recebe sinais pelos dendritos → soma → se passar de um limite, <b>dispara</b>.</div>
+    <div>🤖 <b>Neurônio artificial</b><br>Recebe números → multiplica por <b>pesos</b> → soma → passa por uma <b>ativação</b> → resposta.</div>
+  </div>
+</div>
+
+<!-- M1 -->
+<div class="card mission" id="m1">
+  <h3>🎛️ Missão 1 — Monte a decisão "Vou à praia?" <span class="badge">+25 XP</span></h3>
+  <p>O neurônio decide com base em 3 <b>entradas</b>. Cada uma tem um <b>peso</b> (o quanto ela importa). Mexa nos controles e observe o sinal passando.</p>
+  <div class="row">
+    <canvas id="net" width="520" height="320"></canvas>
+    <div style="flex:1;min-width:260px">
+      <label>☀️ Está sol? (entrada x1): <b id="v_x1"></b></label><input type="range" id="x1" min="0" max="1" step="1" value="1">
+      <label>🚗 Tem carro? (x2): <b id="v_x2"></b></label><input type="range" id="x2" min="0" max="1" step="1" value="0">
+      <label>💸 Tem dinheiro? (x3): <b id="v_x3"></b></label><input type="range" id="x3" min="0" max="1" step="1" value="1">
+      <hr style="border-color:#2a3050">
+      <label>Peso do sol (w1): <b id="v_w1"></b></label><input type="range" id="w1" min="-3" max="3" step="0.1" value="2">
+      <label>Peso do carro (w2): <b id="v_w2"></b></label><input type="range" id="w2" min="-3" max="3" step="0.1" value="1">
+      <label>Peso do dinheiro (w3): <b id="v_w3"></b></label><input type="range" id="w3" min="-3" max="3" step="0.1" value="0.5">
+      <label>Viés / "preguiça" (b): <b id="v_b"></b></label><input type="range" id="b" min="-4" max="2" step="0.1" value="-2">
+    </div>
+  </div>
+  <div class="mono" id="calc"></div>
+  <div class="tip">🎯 Objetivo: deixe <b>sol=1, carro=0, dinheiro=1</b> e ajuste os pesos para a resposta virar <b>"VOU! 🏖️"</b>. Depois tente fazer o <b>carro ser obrigatório</b>.</div>
+</div>
+
+<!-- M2 -->
+<div class="card mission hidden" id="m2">
+  <h3>⚡ Missão 2 — A Ativação: o "interruptor" <span class="badge">+20 XP</span></h3>
+  <p>Depois de somar, o neurônio passa o resultado por uma <b>função de ativação</b>. Ela transforma qualquer número numa resposta útil. Troque e compare:</p>
+  <button id="aStep">Degrau (sim/não)</button><button class="sec" id="aSig">Sigmoide (probabilidade)</button><button class="sec" id="aRelu">ReLU (usada no Deep Learning)</button>
+  <div class="row"><canvas id="act" width="520" height="240"></canvas>
+  <div style="flex:1;min-width:220px" id="actTxt" class="tip"></div></div>
+  <div class="tip">💡 A bolinha amarela é a <b>sua soma atual</b> da Missão 1. Mexa nos pesos lá em cima e veja ela andar aqui.</div>
+</div>
+
+<!-- M3 -->
+<div class="card mission hidden" id="m3">
+  <h3>📉 Missão 3 — Como a IA sabe que errou? <span class="badge">+30 XP</span></h3>
+  <p>A IA calcula o <b>erro</b> (chamado de <i>loss</i>). Imagine uma montanha: o fundo do vale é onde o erro é zero. A IA é uma bolinha <b>de olhos vendados</b>: ela só sente a <b>inclinação</b> do chão e dá um passo para baixo.</p>
+  <div class="row">
+    <canvas id="loss" width="520" height="280"></canvas>
+    <div style="flex:1;min-width:240px">
+      <button id="gdStep">👣 Dar 1 passo</button><button class="sec" id="gdRun">▶️ Descer sozinha</button><button class="sec" id="gdReset">🔄 Recomeçar</button>
+      <label>Tamanho do passo (taxa de aprendizado): <b id="v_lr2">0.1</b></label>
+      <input type="range" id="lr2" min="0.01" max="1.05" step="0.01" value="0.1">
+      <p>Peso: <b id="gw"></b><br>Erro: <b id="gl"></b><br>Inclinação: <b id="gg"></b><br>Passos: <b id="gs">0</b></p>
+    </div>
+  </div>
+  <div class="tip">💡 Esse é o <b>Gradiente Descendente</b>, o algoritmo que treina do neurônio mais simples até o ChatGPT. "Gradiente" é só um nome chique para <b>inclinação</b>.<br>🎯 Chegue com o erro <b>abaixo de 0.01</b>. Depois teste a taxa em <b>1.0</b> e veja a bolinha enlouquecer!</div>
+</div>
+
+<!-- M4 -->
+<div class="card mission hidden" id="m4">
+  <h3>🔁 Missão 4 — O ciclo completo do aprendizado <span class="badge">+25 XP</span></h3>
+  <p>Agora junte tudo. Clique nas etapas <b>na ordem certa</b>:</p>
+  <div id="cyc"></div>
+  <p id="cycOut" class="mono">Sequência: </p>
+</div>
+
+<!-- QUIZ -->
+<div class="card mission hidden quiz" id="m5">
+  <h3>🏆 Desafio final <span class="badge">+50 XP</span></h3>
+  <p id="qq"></p><div id="qa"></div>
+</div>
+
+<div class="card hidden" id="end">
+  <h2>🎉 Aula 2 concluída! Você sabe o que é um neurônio.</h2>
+  <div class="mono">saída = ativação( x1·w1 + x2·w2 + x3·w3 + b )</div>
+  <ol>
+    <li><b>Entradas</b>: os dados (números)</li>
+    <li><b>Pesos</b>: o quanto cada entrada importa. <b>É isso que a IA aprende!</b></li>
+    <li><b>Viés</b>: a tendência inicial (sim ou não)</li>
+    <li><b>Ativação</b>: transforma a soma em resposta</li>
+    <li><b>Loss + Gradiente Descendente</b>: mede o erro e desce a montanha ajustando os pesos</li>
+  </ol>
+  <p>🤯 O ChatGPT tem centenas de <b>bilhões</b> de pesos, mas cada um é ajustado exatamente assim.</p>
+  <p>➡️ Próxima: <b>Aula 3 — Escrevendo seu neurônio em Python</b> (seu primeiro código de IA!).</p>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);let xp=0,done={};
+function gain(n,m){xp+=n;$('xp').style.width=Math.min(100,xp/150*100)+'%';$('xpt').textContent=xp+' XP';$('lvl').textContent='Nível '+(1+Math.floor(xp/50));
+  const t=$('toast');t.textContent=m+'  +'+n+' XP';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800);}
+function complete(id,n,m,next){if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,m);if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),500);}}
+
+/* ===== M1 neurônio ===== */
+const net=$('net'),nc=net.getContext('2d');let actMode='step',lastZ=0;
+const ids=['x1','x2','x3','w1','w2','w3','b'];const V=k=>+$(k).value;
+const actF={step:z=>z>=0?1:0,sig:z=>1/(1+Math.exp(-z)),relu:z=>Math.max(0,z)};
+function drawNet(){
+  ids.forEach(k=>$('v_'+k).textContent=V(k));
+  const x=[V('x1'),V('x2'),V('x3')],w=[V('w1'),V('w2'),V('w3')],b=V('b');
+  const z=x[0]*w[0]+x[1]*w[1]+x[2]*w[2]+b;lastZ=z;const out=actF.step(z);
+  nc.clearRect(0,0,520,320);const ins=[60,160,260],em=['☀️','🚗','💸'];
+  for(let i=0;i<3;i++){const s=x[i]*w[i];nc.strokeStyle=w[i]>=0?'rgba(56,189,248,'+(0.2+Math.min(1,Math.abs(w[i])/3)*0.8)+')':'rgba(244,114,182,'+(0.2+Math.min(1,Math.abs(w[i])/3)*0.8)+')';
+    nc.lineWidth=1+Math.abs(w[i])*3;nc.setLineDash(x[i]?[]:[6,6]);nc.beginPath();nc.moveTo(80,ins[i]);nc.lineTo(250,160);nc.stroke();nc.setLineDash([]);
+    nc.fillStyle=x[i]?'#facc15':'#334';nc.beginPath();nc.arc(60,ins[i],24,0,7);nc.fill();nc.font='22px sans-serif';nc.fillText(em[i],48,ins[i]+8);
+    nc.fillStyle='#ccc';nc.font='13px sans-serif';nc.fillText('×'+w[i],140,(ins[i]+160)/2-6);}
+  nc.fillStyle=out?'#22c55e':'#475';nc.beginPath();nc.arc(280,160,42,0,7);nc.fill();
+  nc.fillStyle='#fff';nc.font='bold 15px sans-serif';nc.fillText('Σ + b',258,156);nc.font='13px sans-serif';nc.fillText(z.toFixed(1),266,176);
+  nc.strokeStyle='#fff';nc.lineWidth=3;nc.beginPath();nc.moveTo(322,160);nc.lineTo(400,160);nc.stroke();
+  nc.font='bold 20px sans-serif';nc.fillStyle=out?'#22c55e':'#f472b6';nc.fillText(out?'VOU! 🏖️':'Fico 🛋️',405,167);
+  $('calc').innerHTML=`soma = (${x[0]}×${w[0]}) + (${x[1]}×${w[1]}) + (${x[2]}×${w[2]}) + (${b}) = <b>${z.toFixed(2)}</b><br>`+
+    `ativação: soma ≥ 0 ? → <b style="color:${out?'#22c55e':'#f472b6'}">${out?'1 = VOU':'0 = FICO'}</b>`;
+  if(out&&x[0]==1&&x[1]==0&&x[2]==1)complete('m1',25,'Você programou um neurônio!','m2');
+  drawAct();
+}
+ids.forEach(k=>$(k).oninput=drawNet);
+
+/* ===== M2 ativação ===== */
+const ac=$('act'),ax=ac.getContext('2d');
+const actInfo={step:'<b>Degrau</b>: tudo ou nada. Abaixo de 0 → 0, acima → 1. Simples, mas a IA não consegue "sentir" o quanto errou.',
+ sig:'<b>Sigmoide</b>: curva suave entre 0 e 1. Vira uma <b>probabilidade</b> ("73% de chance de ir à praia"). Suave = dá para calcular a inclinação!',
+ relu:'<b>ReLU</b>: negativo vira 0, positivo passa direto. Super rápida. É a mais usada nas redes profundas modernas.'};
+let seen={};
+function drawAct(){ax.clearRect(0,0,520,240);ax.strokeStyle='#334';ax.beginPath();ax.moveTo(0,200);ax.lineTo(520,200);ax.moveTo(260,0);ax.lineTo(260,240);ax.stroke();
+  const f=actF[actMode],sy=actMode=='relu'?30:160;ax.strokeStyle='#7c5cff';ax.lineWidth=3;ax.beginPath();
+  for(let px=0;px<=520;px++){const z=(px-260)/40,y=200-f(z)*sy;px?ax.lineTo(px,y):ax.moveTo(px,y);}ax.stroke();
+  const zc=Math.max(-6.4,Math.min(6.4,lastZ));ax.fillStyle='#facc15';ax.beginPath();ax.arc(260+zc*40,200-f(zc)*sy,8,0,7);ax.fill();
+  ax.fillStyle='#fff';ax.font='14px sans-serif';ax.fillText('soma='+lastZ.toFixed(1)+' → saída='+f(lastZ).toFixed(2),10,20);
+  $('actTxt').innerHTML=actInfo[actMode];}
+['aStep','aSig','aRelu'].forEach((id,i)=>$(id).onclick=()=>{actMode=['step','sig','relu'][i];
+  ['aStep','aSig','aRelu'].forEach(o=>$(o).className=o==id?'':'sec');seen[id]=1;drawAct();
+  if(Object.keys(seen).length>=3)complete('m2',20,'Conhece as ativações!','m3');});
+seen.aStep=1;
+
+/* ===== M3 gradiente ===== */
+const lc=$('loss'),lx=lc.getContext('2d');let gw=-2.6,gsteps=0,gtimer=null,trail=[];
+const L=w=>(w-1)**2*0.5,G=w=>(w-1);
+function drawLoss(){lx.clearRect(0,0,520,280);const X=w=>(w+3)/7*520,Y=l=>260-l*28;
+  lx.strokeStyle='#38bdf8';lx.lineWidth=3;lx.beginPath();for(let w=-3;w<=4;w+=.02){w==-3?lx.moveTo(X(w),Y(L(w))):lx.lineTo(X(w),Y(L(w)));}lx.stroke();
+  lx.fillStyle='#22c55e';lx.font='13px sans-serif';lx.fillText('🏁 erro zero',X(1)-35,275);
+  trail.forEach((w,i)=>{lx.fillStyle='rgba(250,204,21,'+(0.15+i/trail.length*0.4)+')';lx.beginPath();lx.arc(X(w),Y(L(w)),5,0,7);lx.fill();});
+  const g=G(gw);lx.strokeStyle='#f472b6';lx.lineWidth=2;lx.beginPath();lx.moveTo(X(gw-.6),Y(L(gw)-g*.6));lx.lineTo(X(gw+.6),Y(L(gw)+g*.6));lx.stroke();
+  lx.fillStyle='#facc15';lx.beginPath();lx.arc(X(gw),Y(L(gw))-10,10,0,7);lx.fill();lx.font='16px sans-serif';lx.fillText('🙈',X(gw)-9,Y(L(gw))-26);
+  $('gw').textContent=gw.toFixed(3);$('gl').textContent=L(gw).toFixed(4);$('gg').textContent=g.toFixed(3)+(g>0?' (desce p/ esquerda)':' (desce p/ direita)');$('gs').textContent=gsteps;
+  if(L(gw)<0.01)complete('m3',30,'Desceu a montanha!','m4');}
+function gdStep(){trail.push(gw);if(trail.length>25)trail.shift();gw=gw-(+$('lr2').value)*G(gw);gw=Math.max(-3,Math.min(4,gw));gsteps++;drawLoss();}
+$('gdStep').onclick=gdStep;$('gdRun').onclick=()=>{if(gtimer)return;let n=0;gtimer=setInterval(()=>{gdStep();if(++n>40||L(gw)<1e-5){clearInterval(gtimer);gtimer=null;}},150);};
+$('gdReset').onclick=()=>{clearInterval(gtimer);gtimer=null;gw=-2.6;gsteps=0;trail=[];drawLoss();};
+$('lr2').oninput=e=>$('v_lr2').textContent=e.target.value;
+
+/* ===== M4 ciclo ===== */
+const steps=['1️⃣ Recebe os dados','2️⃣ Faz uma previsão','3️⃣ Calcula o erro (loss)','4️⃣ Calcula a inclinação (gradiente)','5️⃣ Ajusta os pesos','🔁 Repete'];
+let order=[...steps].sort(()=>Math.random()-.5),pos=0;
+function buildCyc(){$('cyc').innerHTML='';order.forEach(s=>{const b=document.createElement('button');b.className='sec';b.textContent=s.slice(3).trim()||s;b.onclick=()=>{
+  if(s===steps[pos]){b.style.background='#22c55e';b.disabled=true;pos++;$('cycOut').textContent+=' → '+(s.slice(3).trim()||s);if(pos===steps.length){complete('m4',25,'Ciclo dominado!','m5');quiz();}}
+  else{b.style.background='#ef4444';setTimeout(()=>b.style.background='',500);}};$('cyc').appendChild(b);});}
+buildCyc();
+
+/* ===== QUIZ ===== */
+const Q=[["O que a IA realmente APRENDE durante o treino?",["Os dados de entrada","Os pesos","A função de ativação"],1],
+ ["Para que serve a função de ativação?",["Transformar a soma numa resposta útil","Apagar erros","Guardar os dados"],0],
+ ["No gradiente descendente, a IA de olhos vendados usa o quê para saber para onde ir?",["Um mapa","A inclinação do erro","Sorte"],1],
+ ["O que acontece com taxa de aprendizado alta demais?",["Aprende perfeito","Fica pulando e pode nunca acertar","Para de funcionar o PC"],1]];
+let qi=0;function quiz(){if(qi>=Q.length){complete('m5',50,'Aula 2 concluída!','end');return;}
+  const [q,ops,r]=Q[qi];$('qq').textContent=`Pergunta ${qi+1}/${Q.length}: ${q}`;$('qa').innerHTML='';
+  ops.forEach((o,i)=>{const bt=document.createElement('button');bt.textContent=o;bt.onclick=()=>{if(i===r){bt.className='right';qi++;setTimeout(quiz,700);}else bt.className='wrong';};$('qa').appendChild(bt);});}
+
+drawNet();drawLoss();
+</script>
+</body>
+</html>

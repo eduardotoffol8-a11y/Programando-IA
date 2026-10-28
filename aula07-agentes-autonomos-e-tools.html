@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 7 — Agentes Autônomos de IA & Tool Use (IAs que Agem Sozinhas)</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--a:#38bdf8;--b:#f472b6;--y:#facc15;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,Segoe UI,sans-serif;background:var(--bg);color:var(--txt)}
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:10;border-bottom:1px solid #2a3050}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  main{max-width:1040px;margin:auto;padding:20px}
+  .card{background:var(--card);border-radius:16px;padding:22px;margin-bottom:18px;box-shadow:0 4px 20px #0005}
+  .mission{border-left:5px solid var(--acc)}
+  .mission.done{border-left-color:var(--ok)}
+  .mission h3{margin:0 0 8px}
+  .badge{display:inline-block;padding:2px 10px;border-radius:20px;background:#2a3050;font-size:.8rem;margin-left:6px}
+  button{background:var(--acc);color:#fff;border:0;padding:10px 16px;border-radius:10px;font-size:1rem;cursor:pointer;margin:4px 4px 4px 0;font-weight:600}
+  button:hover{filter:brightness(1.15)}
+  button.sec{background:#2a3050}
+  .row{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-start}
+  .tip{background:#22284a;padding:12px 16px;border-radius:10px;margin-top:12px;font-size:.95rem;line-height:1.5}
+  .hidden{display:none}
+  .mono{font-family:Consolas,monospace;background:#0b0e1a;padding:14px;border-radius:10px;line-height:1.6;font-size:.92rem}
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:12px 22px;border-radius:12px;font-weight:700;transition:transform .4s;z-index:99}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .tool-chip{display:inline-flex;align-items:center;gap:8px;background:#151a2e;border:1px solid #3b4268;padding:8px 14px;border-radius:10px;margin:4px;cursor:pointer;user-select:none;transition:all .2s}
+  .tool-chip.active{border-color:var(--ok);background:#162e24;color:#86efac}
+  .agent-box{background:#111628;border:1px solid #2a3050;border-radius:12px;padding:16px;margin-bottom:12px}
+  .agent-step{padding:8px 12px;border-radius:8px;margin-bottom:6px;background:#1a2138;border-left:3px solid #64748b;font-size:.92rem}
+  .agent-step.thought{border-left-color:var(--y);background:#2b291d}
+  .agent-step.action{border-left-color:var(--a);background:#1a2838}
+  .agent-step.obs{border-left-color:var(--ok);background:#142d20}
+  .quiz button{display:block;width:100%;text-align:left;background:#2a3050;margin-bottom:8px}
+  .quiz button.right{background:var(--ok);color:#052e16}
+  .quiz button.wrong{background:#ef4444}
+</style>
+</head>
+<body>
+<header>
+  <b>🦾 Academia IA — Aula 7: Agentes Autônomos & Tool Use</b>
+  <div style="display:flex;align-items:center;gap:10px">
+    <span id="lvl">Nível 1</span>
+    <div class="xpbar"><div class="xpfill" id="xp"></div></div>
+    <span id="xpt">0 XP</span>
+  </div>
+</header>
+<main>
+
+<div class="card">
+  <h2>Do Chatbot Passivo ao Agente Autônomo ⏱️ 14 min</h2>
+  <p>Um <b>Chatbot comum</b> apenas responde texto quando você pergunta. Ele é cego e não tem braços.<br>
+  Um <b>Agente de IA (Agent)</b> recebe um objetivo, <b>raciocina, escolhe ferramentas (APIs, calculadoras, navegadores), executa ações no mundo real</b> e analisa o resultado até resolver o problema sozinho!</p>
+</div>
+
+<!-- MISSÃO 1 -->
+<div class="card mission" id="m1">
+  <h3>🧰 Missão 1 — O Cinto de Utilidades (Tool Calling / Ferramentas) <span class="badge">+30 XP</span></h3>
+  <p>Um LLM não sabe matemática de cabeça e não tem acesso à internet em tempo real. Mas nós podemos "dar ferramentas" para ele.<br>
+  Clique para equipar as ferramentas que o seu Agente poderá usar:</p>
+  <div id="toolsList">
+    <div class="tool-chip active" data-t="web">🌐 Busca na Web (Google/Bing)</div>
+    <div class="tool-chip active" data-t="calc">🧮 Calculadora Python Exata</div>
+    <div class="tool-chip" data-t="sql">🗄️ Consulta Banco de Dados SQL</div>
+    <div class="tool-chip" data-t="email">✉️ Disparador de E-mails</div>
+    <div class="tool-chip" data-t="calendar">📅 Agendador de Calendário</div>
+  </div>
+  <p>Ferramentas equipadas: <b id="toolsEquipped" style="color:var(--ok)">2 ativas</b></p>
+  <div class="tip">💡 Quando você conecta uma ferramenta, o modelo de IA recebe a <b>descrição em texto</b> do que aquela função faz. Quando ele precisa da resposta, ele pára de falar com você e manda uma instrução para o computador rodar a ferramenta!</div>
+</div>
+
+<!-- MISSÃO 2 -->
+<div class="card mission hidden" id="m2">
+  <h3>📜 Missão 2 — Como a IA Chama uma Ferramenta (JSON Function Calling) <span class="badge">+35 XP</span></h3>
+  <p>Em vez de falar em português com a máquina, a IA gera um <b>objeto JSON padronizado</b>. Clique no botão para ver a IA traduzir o pedido do usuário em uma chamada de API:</p>
+  <div style="margin-bottom:10px">
+    <button class="sec f-btn" data-ex="calc">Pedido 1: "Quanto é 384 vezes 97 menos 12% de imposto?"</button>
+    <button class="sec f-btn" data-ex="flight">Pedido 2: "Reserve um voo de SP para RJ na próxima sexta"</button>
+  </div>
+  <div class="mono" id="jsonOutput" style="color:#38bdf8;min-height:120px">
+    Clique em um dos pedidos acima para ver a chamada de função gerada pelo LLM...
+  </div>
+  <div class="tip">💡 <b>Function Calling</b> é o segredo de toda automação corporativa moderna: a IA recebe linguagem humana e cospe JSON perfeito para integrar com qualquer software da empresa!</div>
+</div>
+
+<!-- MISSÃO 3 -->
+<div class="card mission hidden" id="m3">
+  <h3>🔄 Missão 3 — O Loop ReAct (Pensar 🧠 ➔ Agir ⚡ ➔ Observar 👁️) <span class="badge">+40 XP</span></h3>
+  <p>A arquitetura mais famosa de Agentes se chama <b>ReAct (Reason + Act)</b>. Acompanhe o agente resolver uma missão complexa passo a passo:</p>
+  <div style="background:#0b0e1a;padding:12px;border-radius:10px;margin-bottom:12px;border-left:4px solid var(--y)">
+    🎯 <b>Objetivo do Agente:</b> <i>"Descubra o preço atual da ação da Apple (AAPL), converta para Reais (BRL) usando a cotação do dólar e envie por e-mail para a diretoria."</i>
+  </div>
+  <button id="stepAgent">👣 Avançar 1 Passo do Agente</button>
+  <button class="sec" id="autoAgent">▶️ Executar Tudo Automaticamente</button>
+  <div class="agent-box" id="agentTrace" style="margin-top:12px;min-height:160px">
+    <div style="color:#94a3b8;font-size:13px">Aguardando início do agente...</div>
+  </div>
+</div>
+
+<!-- MISSÃO 4 -->
+<div class="card mission hidden" id="m4">
+  <h3>👥 Missão 4 — Sistemas Multi-Agente (Trabalho em Equipe de IAs) <span class="badge">+35 XP</span></h3>
+  <p>Em vez de 1 agente tentar fazer tudo, o padrão da indústria (usando frameworks como <b>CrewAI</b> e <b>LangGraph</b>) é criar uma equipe de especialistas:</p>
+  <div class="row">
+    <div class="card" style="flex:1;min-width:220px;background:#17223b;border:1px solid #38bdf8">
+      <h4 style="color:#38bdf8;margin:0 0 6px">🕵️ Agente 1: Pesquisador</h4>
+      <p style="font-size:13px;color:#94a3b8">Varre a internet, lê relatórios e extrai fatos brutos com links e fontes.</p>
+    </div>
+    <div style="align-self:center;font-size:1.5rem">➡️</div>
+    <div class="card" style="flex:1;min-width:220px;background:#2d1b30;border:1px solid #f472b6">
+      <h4 style="color:#f472b6;margin:0 0 6px">✍️ Agente 2: Redator</h4>
+      <p style="font-size:13px;color:#94a3b8">Recebe os fatos do Pesquisador e escreve um artigo ou proposta comercial impecável.</p>
+    </div>
+    <div style="align-self:center;font-size:1.5rem">➡️</div>
+    <div class="card" style="flex:1;min-width:220px;background:#152b20;border:1px solid #4ade80">
+      <h4 style="color:#4ade80;margin:0 0 6px">🧐 Agente 3: Revisor / Crítico</h4>
+      <p style="font-size:13px;color:#94a3b8">Checa se há erros, inconsistências ou alucinações antes de aprovar a entrega final.</p>
+    </div>
+  </div>
+  <button id="btnMultiUnderstand" style="margin-top:8px">Entendi a força dos Multi-Agentes! ✅</button>
+</div>
+
+<!-- QUIZ -->
+<div class="card mission hidden quiz" id="m5">
+  <h3>🏆 Desafio Final da Aula 7 <span class="badge">+50 XP</span></h3>
+  <p id="qq"></p><div id="qa"></div>
+</div>
+
+<div class="card hidden" id="end">
+  <h2>🎉 Você dominou o topo da cadeia da IA: Agentes Autônomos!</h2>
+  <p>Vamos resumir essa virada de chave:</p>
+  <ul>
+    <li>✅ <b>Tool Use / Function Calling:</b> A IA gera saídas estruturadas em JSON para acionar APIs, bancos e calculadoras.</li>
+    <li>✅ <b>O Loop ReAct:</b> Raciocínio contínuo $\rightarrow$ Ação $\rightarrow$ Análise do retorno $\rightarrow$ Conclusão do objetivo.</li>
+    <li>✅ <b>Sistemas Multi-Agente:</b> Equipes de IAs especializadas (Pesquisador, Redator, Auditor) colaborando como uma empresa inteira!</li>
+  </ul>
+  <div class="tip">💼 <b>O Futuro das Vendas e Consultorias de IA:</b> A era de vender "assistente de texto" acabou. O mercado agora paga fortunas por <b>Sistemas Autônomos de Agentes</b> que atendem clientes, emitem notas, cruzam dados e operam sozinhos 24 horas por dia.</div>
+  <p>➡️ Próxima parada: <b>Aula 8 — MLOps, Deploy & Engenharia de Produção</b></p>
+  <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#151a2e;border-radius:10px">
+    <a href="aula06-rag-e-bancos-vetoriais.html" style="color:#38bdf8;text-decoration:none;font-weight:bold">⬅️ Voltar para Aula 6: RAG</a>
+    <a href="aula08-mlops-deploy-e-producao.html" style="background:#22c55e;color:#052e16;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:bold">Avançar para Aula 8 ➡️</a>
+  </div>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let xp=0,done={};
+function gain(n,m){
+  xp+=n;
+  $('xp').style.width=Math.min(100,xp/190*100)+'%';
+  $('xpt').textContent=xp+' XP';
+  $('lvl').textContent='Nível '+(1+Math.floor(xp/60));
+  const t=$('toast');t.textContent=m+'  +'+n+' XP';t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+function complete(id,n,m,next){
+  if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,m);
+  if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),450);}
+}
+
+/* ===== MISSÃO 1: Tool Belt ===== */
+document.querySelectorAll('.tool-chip').forEach(c=>{
+  c.onclick=()=>{
+    c.classList.toggle('active');
+    const act=document.querySelectorAll('.tool-chip.active').length;
+    $('toolsEquipped').textContent=act+' ativas';
+    if(act>=4) complete('m1',30,'Equipou o Cinto de Ferramentas!','m2');
+  };
+});
+
+/* ===== MISSÃO 2: Function Calling JSON ===== */
+const callExamples={
+  calc:`{\n  "tool": "calculadora_python",\n  "argumentos": {\n    "expressao": "(384 * 97) * (1 - 0.12)"\n  },\n  "motivo": "Modelos de linguagem erram contas aritméticas exatas; a ferramenta executará o cálculo sem risco de falha."\n}`,
+  flight:`{\n  "tool": "api_companhia_aerea",\n  "argumentos": {\n    "origem": "SAO",\n    "destino": "RIO",\n    "data_partida": "2026-10-30",\n    "classe": "economica"\n  },\n  "motivo": "Buscar disponibilidade em tempo real nos servidores da companhia aérea."\n}`
+};
+document.querySelectorAll('.f-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    const ex=btn.dataset.ex;
+    document.querySelectorAll('.f-btn').forEach(b=>b.className='sec f-btn');
+    btn.className='f-btn';
+    $('jsonOutput').textContent=callExamples[ex];
+    complete('m2',35,'Decifrou o Function Calling!','m3');
+  };
+});
+
+/* ===== MISSÃO 3: Loop ReAct ===== */
+const traceSteps=[
+  {type:'thought',text:'🧠 <b>Pensamento 1:</b> Preciso descobrir a cotação atual da AAPL. Vou chamar a ferramenta de busca financeira.'},
+  {type:'action',text:'⚡ <b>Ação 1:</b> Chamar <code>buscar_acao(ticker="AAPL")</code>'},
+  {type:'obs',text:'👁️ <b>Observação 1:</b> Retorno da API: <code>{"preco_usd": 235.50, "moeda": "USD"}</code>'},
+  {type:'thought',text:'🧠 <b>Pensamento 2:</b> Tenho o valor em dólar. Agora preciso da cotação USD/BRL para fazer a conversão exata.'},
+  {type:'action',text:'⚡ <b>Ação 2:</b> Chamar <code>cotacao_cambio(par="USD_BRL")</code>'},
+  {type:'obs',text:'👁️ <b>Observação 2:</b> Retorno da API: <code>{"taxa": 5.40}</code>'},
+  {type:'thought',text:'🧠 <b>Pensamento 3:</b> Agora vou multiplicar 235.50 × 5.40 = R$ 1.271,70 e disparar o e-mail solicitado.'},
+  {type:'action',text:'⚡ <b>Ação 3:</b> Chamar <code>enviar_email(dest="diretoria@empresa.com", assunto="Cotação AAPL", corpo="AAPL está R$ 1.271,70")</code>'},
+  {type:'obs',text:'✅ <b>Observação 3:</b> <code>{"status": "sucesso", "msg_id": "98124"}</code> — Objetivo totalmente concluído!'}
+];
+let traceIdx=0;
+function renderNextTrace(){
+  if(traceIdx===0) $('agentTrace').innerHTML='';
+  if(traceIdx < traceSteps.length){
+    const s=traceSteps[traceIdx];
+    const div=document.createElement('div');
+    div.className='agent-step '+s.type;
+    div.innerHTML=s.text;
+    $('agentTrace').appendChild(div);
+    traceIdx++;
+    if(traceIdx>=traceSteps.length) complete('m3',40,'Mestre do Loop ReAct!','m4');
+  }
+}
+$('stepAgent').onclick=renderNextTrace;
+$('autoAgent').onclick=()=>{
+  const t=setInterval(()=>{
+    renderNextTrace();
+    if(traceIdx>=traceSteps.length) clearInterval(t);
+  },500);
+};
+
+/* ===== MISSÃO 4: Multi-Agentes ===== */
+$('btnMultiUnderstand').onclick=()=>{
+  complete('m4',35,'Entendeu a dinâmica Multi-Agente!','m5');
+  quiz();
+};
+
+/* ===== QUIZ ===== */
+const Q=[
+  ["Qual a diferença central entre um Chatbot clássico e um Agente de IA?",["O chatbot é mais caro","O agente raciocina, escolhe e executa ferramentas no mundo real para resolver metas sozinhas","O chatbot tem sentimentos"],1],
+  ["O que é Function Calling?",["Uma falha no servidor de IA","A capacidade da IA de responder em JSON padronizado para acionar funções e APIs externas","Uma ligação telefônica feita pela IA"],1],
+  ["Qual é a ordem correta das etapas no framework ReAct?",["Dormir ➔ Esquecer ➔ Responder","Pensar (Reason) ➔ Agir com Ferramenta (Act) ➔ Observar o Retorno (Observation)","Chutar ➔ Errar ➔ Apagar tudo"],1]
+];
+let qi=0;
+function quiz(){
+  if(qi>=Q.length){complete('m5',50,'Mestre da Aula 7!','end');return;}
+  const [q,ops,r]=Q[qi];
+  $('qq').textContent=`Pergunta ${qi+1}/${Q.length}: ${q}`;
+  $('qa').innerHTML='';
+  ops.forEach((o,i)=>{
+    const bt=document.createElement('button');bt.textContent=o;
+    bt.onclick=()=>{if(i===r){bt.className='right';qi++;setTimeout(quiz,700);}else bt.className='wrong';};
+    $('qa').appendChild(bt);
+  });
+}
+</script>
+</body>
+</html>

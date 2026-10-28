@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 10 — Context Pruning & Prompt Caching na Prática Corporativa</title>
+<style>
+  :root{--bg:#0f1220;--card:#1a1f36;--acc:#7c5cff;--ok:#22c55e;--warn:#f59e0b;--err:#ef4444;--a:#38bdf8;--b:#f472b6;--y:#facc15;--txt:#e5e7eb}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--txt);line-height:1.55}
+  
+  /* NAVEGAÇÃO */
+  nav.top-nav{background:#111528;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #2a3050;font-size:0.9rem}
+  nav.top-nav a{color:var(--a);text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+  nav.top-nav a:hover{text-decoration:underline}
+  
+  header{display:flex;justify-content:space-between;align-items:center;padding:14px 22px;background:#151a2e;position:sticky;top:0;z-index:20;border-bottom:1px solid #2a3050}
+  .xpbar{width:220px;height:12px;background:#2a3050;border-radius:8px;overflow:hidden}
+  .xpfill{height:100%;width:0;background:linear-gradient(90deg,var(--acc),var(--ok));transition:width .5s}
+  
+  main{max-width:1080px;margin:auto;padding:24px 20px}
+  .card{background:var(--card);border-radius:16px;padding:24px;margin-bottom:22px;box-shadow:0 4px 24px #0006}
+  .mission{border-left:5px solid var(--acc);transition:border-color .3s}
+  .mission.done{border-left-color:var(--ok)}
+  .mission h3{margin:0 0 10px;font-size:1.3rem}
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;background:#2a3050;font-size:.8rem;margin-left:8px;font-weight:normal}
+  
+  button{background:var(--acc);color:#fff;border:0;padding:11px 18px;border-radius:10px;font-size:0.95rem;cursor:pointer;margin:4px 6px 4px 0;font-weight:600;transition:all .15s}
+  button:hover{filter:brightness(1.15);transform:translateY(-1px)}
+  button.sec{background:#2a3050;color:#cbd5e1}
+  button.sec:hover{background:#38416d}
+  
+  .row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start}
+  .tip{background:#22284a;padding:14px 18px;border-radius:12px;margin-top:14px;font-size:.95rem;border-left:4px solid var(--a)}
+  .hidden{display:none}
+  .mono{font-family:Consolas,SFMono-Regular,Menlo,monospace;background:#0b0e1a;padding:14px;border-radius:10px;line-height:1.65;font-size:.9rem;border:1px solid #222944}
+  
+  /* GAUGES & METRICS */
+  .gauge{display:inline-flex;flex-direction:column;align-items:center;background:#13182c;padding:14px 18px;border-radius:12px;border:1px solid #2d3557;min-width:130px}
+  .gauge .val{font-size:1.7rem;font-weight:700;color:var(--y);margin:4px 0}
+  .gauge .lbl{font-size:0.75rem;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
+  
+  /* CONTEXT TREE / PRUNING */
+  .ctx-item{background:#172038;border:1px solid #334155;border-radius:8px;padding:10px 14px;margin-bottom:8px;transition:all .25s;display:flex;justify-content:space-between;align-items:center}
+  .ctx-item.pruned{opacity:.35;text-decoration:line-through;background:#241922;border-color:#ef444455}
+  .ctx-item.cached{border-color:var(--ok);background:#132d20;box-shadow:0 0 10px rgba(34,197,94,.2)}
+  
+  /* QUIZ */
+  .quiz-box{background:#111628;border:1px solid #2e385c;border-radius:14px;padding:20px;margin-top:16px}
+  .quiz-option{display:block;width:100%;text-align:left;background:#1e2642;color:#e2e8f0;padding:14px 16px;border-radius:10px;margin-bottom:10px;font-size:0.95rem;line-height:1.45;border:1px solid #333f68;transition:all .15s}
+  .quiz-option:hover{background:#2a365e;border-color:var(--a)}
+  .quiz-option.correct{background:#143825;border-color:var(--ok);color:#86efac;font-weight:600}
+  .quiz-option.incorrect{background:#38161c;border-color:var(--err);color:#fca5a5}
+  .quiz-feedback{padding:14px 18px;border-radius:10px;margin-top:12px;font-size:0.93rem;line-height:1.55}
+  
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:var(--ok);color:#06210f;padding:14px 26px;border-radius:14px;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,0.5);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);z-index:999}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .nav-footer{display:flex;justify-content:space-between;align-items:center;background:#111628;padding:18px 24px;border-radius:14px;border:1px solid #2a3050;margin-top:30px}
+  input[type=range]{width:100%}
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <a href="aula09-blueprint-de-monetizacao.html">⬅️ Aula 9: Blueprint de Monetização</a>
+  <span style="color:#64748b;font-weight:600">Trilha Mestre IA • Especialização Corporativa (Otimização de Custos e Latência)</span>
+  <span style="color:#94a3b8">Aula 10</span>
+</nav>
+
+<header>
+  <b>⚡ Academia IA — Aula 10: Context Pruning & Prompt Caching no Trabalho</b>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span id="lvl" style="font-weight:600">Nível 1</span>
+    <div class="xpbar"><div class="xpfill" id="xp"></div></div>
+    <span id="xpt" style="color:var(--y);font-weight:bold">0 XP</span>
+  </div>
+</header>
+
+<main>
+
+<div class="card">
+  <h2>A Dor nº 1 nas Empresas: Faturas Explosivas de IA & Latência de 10s ⏱️ 16 min</h2>
+  <p>No dia a dia corporativo, quase toda aplicação séria (Chatbots de Suporte, RAG de Contratos, Agentes Autônomos de Código) envia <b>50.000 a 100.000 tokens repetidos</b> a cada interação:</p>
+  <ul>
+    <li>💸 <b>O Custo:</b> A cada mensagem do usuário, a empresa paga pelo documento inteiro de novo. Uma equipe de 20 pessoas gera contas de US$ 2.000 a US$ 8.000/mês só em chamadas de API.</li>
+    <li>🐢 <b>A Latência:</b> O modelo leva de 4 a 10 segundos apenas para ler e computar os tokens de entrada antes de cuspir a primeira palavra (TTFT - Time-to-First-Token).</li>
+    <li>🧠 <b>O Problema "Lost in the Middle":</b> Com contextos gigantescos e cheios de lixo, os LLMs perdem o foco e esquecem detalhes importantes escondidos no meio do texto.</li>
+  </ul>
+  <p>A solução profissional consiste em duas armas complementares: <b>Prompt Caching</b> (não pagar nem recomputar o que é estático) e <b>Context Pruning</b> (podar cirurgicamente o lixo da janela de contexto).</p>
+</div>
+
+<!-- MISSÃO 1 -->
+<div class="card mission" id="m1">
+  <h3>⚡ Missão 1 — Prompt Caching: Cortando 90% da Fatura de API <span class="badge">+35 XP</span></h3>
+  <p>Provedores como <b>Anthropic (Claude 3.5), OpenAI (GPT-4o) e Google (Gemini 1.5)</b> introduziram o <b>Prompt Caching</b>. O servidor guarda na memória da GPU a representação já computada (KV Cache) do seu prefixo estático (manual da empresa, system prompt e PDFs).<br>
+  Nas mensagens seguintes, se o prefixo for <b>idêntico</b>, você paga <b>até 90% menos</b> e a resposta sai quase instantaneamente!</p>
+  
+  <div class="row" style="margin-top:14px">
+    <div style="flex:1;min-width:280px">
+      <label><b>Simular 1.000 Consultas no Chatbot da Empresa:</b></label><br>
+      <button id="btnRunNoCache" class="sec">1️⃣ Executar SEM Prompt Caching</button>
+      <button id="btnRunCache" class="sec">2️⃣ Executar COM Prompt Caching (KV Hit)</button>
+      
+      <div class="tip" id="cacheDesc">
+        Clique no botão 1 para ver o custo e a latência de um bot convencional reenviando 60.000 tokens a cada pergunta.
+      </div>
+    </div>
+    
+    <div style="flex:1.2;min-width:300px;display:flex;gap:12px;flex-wrap:wrap">
+      <div class="gauge">
+        <span class="lbl">Fatura da API</span>
+        <span class="val" id="gCost" style="color:var(--err)">$ 180.00</span>
+        <span style="font-size:0.75rem;color:#94a3b8">por 1.000 requisições</span>
+      </div>
+      <div class="gauge">
+        <span class="lbl">Tempo de Resposta (TTFT)</span>
+        <span class="val" id="gTime" style="color:var(--err)">5.8s</span>
+        <span style="font-size:0.75rem;color:#94a3b8">Espera do usuário</span>
+      </div>
+      <div class="gauge">
+        <span class="lbl">Cache Hit Rate</span>
+        <span class="val" id="gHit" style="color:#94a3b8">0%</span>
+        <span style="font-size:0.75rem;color:#94a3b8">Aproveitamento</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 2 -->
+<div class="card mission hidden" id="m2">
+  <h3>⚠️ Missão 2 — O Ponto Crítico: O Que Invalida o Cache? <span class="badge">+40 XP</span></h3>
+  <p>Prompt Caching funciona por <b>prefixo exato</b>. Se você alterar um único caractere no começo ou no meio do bloco cacheado, <b>todo o cache é invalidado e a empresa paga preço cheio</b>!<br>
+  Veja a anatomia de uma requisição e teste o erro mais comum que iniciantes cometem no trabalho:</p>
+  
+  <div class="mono" id="promptStructure" style="font-size:12px;line-height:1.6">
+    <div id="p1" style="color:#38bdf8;padding:4px;border-radius:4px">[BLOCO 1 - ESTÁTICO / CACHEADO]: System Prompt + 4 Manuais da Empresa (55.000 tokens) 🔒</div>
+    <div id="p2" style="color:#facc15;padding:4px;border-radius:4px;margin-top:4px">[BLOCO 2 - ESTÁTICO / CACHEADO]: Exemplos Few-Shot + Tabela de Produtos (10.000 tokens) 🔒</div>
+    <div id="p3" style="color:#4ade80;padding:4px;border-radius:4px;margin-top:4px">[BLOCO 3 - DINÂMICO / FINAL]: Pergunta do Usuário: "Como estornar o pedido #8291?" (35 tokens) ⚡</div>
+  </div>
+  
+  <div style="margin-top:12px">
+    <button id="btnGoodArch" class="sec">✅ Arquitetura Correta (Dinâmico no Final)</button>
+    <button id="btnBadArch" class="sec">❌ Erro Fatal (Data/Timestamp no Topo)</button>
+  </div>
+  
+  <div class="tip" id="archTip" style="border-left-color:var(--y)">
+    👆 Clique em um dos botões acima para ver a consequência na infraestrutura.
+  </div>
+</div>
+
+<!-- MISSÃO 3 -->
+<div class="card mission hidden" id="m3">
+  <h3>✂️ Missão 3 — Context Pruning: A Arte de Podar o Lixo <span class="badge">+45 XP</span></h3>
+  <p>Em chats longos ou agentes autônomos, o histórico acumula saudações vazias, mensagens antigas e <b>respostas gigantescas de bancos de dados (JSON de 800 linhas)</b> que o modelo usou uma vez e nunca mais precisará.<br>
+  O <b>Context Pruning</b> elimina essas gorduras antes da chamada à API. Teste os níveis de poda abaixo:</p>
+  
+  <div class="row">
+    <div style="flex:1.4;min-width:320px">
+      <b>Janela de Contexto Ativa da Conversa:</b>
+      <div id="ctxList" style="margin-top:10px">
+        <div class="ctx-item" data-type="sys"><span>🔒 <b>System:</b> Você é o assistente oficial de suporte.</span><span style="font-size:11px;color:#94a3b8">850 tokens</span></div>
+        <div class="ctx-item" data-type="greet"><span>💬 <b>User:</b> Olá bom dia! Tudo bem com você?</span><span style="font-size:11px;color:#94a3b8">12 tokens</span></div>
+        <div class="ctx-item" data-type="greet"><span>🤖 <b>Bot:</b> Olá! Tudo ótimo. Como posso te ajudar hoje?</span><span style="font-size:11px;color:#94a3b8">15 tokens</span></div>
+        <div class="ctx-item" data-type="tool"><span>🛠️ <b>Tool Output (SQL Bruto):</b> JSON de 420 produtos retornados do banco...</span><span style="font-size:11px;color:#ef4444">18.400 tokens</span></div>
+        <div class="ctx-item" data-type="old"><span>💬 <b>User:</b> O cliente confirmou que quer a NF com CNPJ 12.345...</span><span style="font-size:11px;color:#94a3b8">45 tokens</span></div>
+        <div class="ctx-item" data-type="active"><span>💬 <b>User (Atual):</b> Emita agora a fatura com base nas informações anteriores.</span><span style="font-size:11px;color:#38bdf8">28 tokens</span></div>
+      </div>
+    </div>
+    
+    <div style="flex:1;min-width:260px">
+      <label><b>Nível de Podagem (Pruning):</b></label><br>
+      <button class="sec prune-btn" data-lvl="none">1. Sem Poda (Original: 19.350 tokens)</button>
+      <button class="sec prune-btn" data-lvl="tools">2. Poda de Tool Outputs (Corta JSONs velhos)</button>
+      <button class="sec prune-btn" data-lvl="full">3. Poda Semântica + Sumarização (Restam 950 tokens!)</button>
+      
+      <div class="gauge" style="width:100%;margin-top:14px">
+        <span class="lbl">Consumo de Contexto</span>
+        <span class="val" id="gTokens">19.350</span>
+        <span style="font-size:0.75rem;color:#94a3b8" id="gSavings">Sem economia</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MISSÃO 4 -->
+<div class="card mission hidden" id="m4">
+  <h3>💻 Missão 4 — Como Escrever em Código Real (Python + Anthropic/OpenAI) <span class="badge">+40 XP</span></h3>
+  <p>Veja como é simples ativar Prompt Caching no código de produção da sua empresa usando a SDK oficial:</p>
+  
+  <div class="mono" style="font-size:12px;line-height:1.6">
+    <span style="color:#64748b"># Exemplo de Produção com Anthropic Python SDK (Prompt Caching Ephemeral)</span><br>
+    <span style="color:#c084fc">import</span> anthropic<br>
+    client = anthropic.Anthropic()<br><br>
+    response = client.beta.prompt_caching.messages.create(<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;model=<span style="color:#facc15">"claude-3-5-sonnet-20241022"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;max_tokens=<span style="color:#facc15">1024</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;system=[<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#facc15">"type"</span>: <span style="color:#facc15">"text"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#facc15">"text"</span>: manual_juridico_completo_com_80_paginas,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#64748b"># 🎯 A MÁGICA ESTÁ AQUI: Marca o bloco como PONTO DE CACHE!</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#38bdf8">"cache_control"</span>: {<span style="color:#facc15">"type"</span>: <span style="color:#facc15">"ephemeral"</span>}<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;],<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;messages=[{<span style="color:#facc15">"role"</span>: <span style="color:#facc15">"user"</span>, <span style="color:#facc15">"content"</span>: <span style="color:#facc15">"O contrato prevê carência de rescisão?"</span>}]<br>
+    )<br><br>
+    <span style="color:#64748b"># Métricas retornadas na fatura da API:</span><br>
+    <span style="color:#c084fc">print</span>(response.usage.cache_read_input_tokens)&nbsp;&nbsp;<span style="color:#4ade80"># 62.400 (Cobrado com 90% de desconto!)</span><br>
+    <span style="color:#c084fc">print</span>(response.usage.input_tokens)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#94a3b8"># 15 (Tokens da pergunta nova)</span>
+  </div>
+  <button id="btnCopyCode" style="margin-top:10px">Entendi a sintaxe de produção! ✅</button>
+</div>
+
+<!-- MISSÃO 5: QUIZ DE TRABALHO -->
+<div class="card mission hidden" id="m5">
+  <h3>🏆 Questionário de Decisão Técnica (Cenários Reais no Trabalho) <span class="badge">+60 XP</span></h3>
+  <p>5 perguntas práticas de decisões que você tomará em reuniões de arquitetura e projetos de clientes:</p>
+  
+  <div class="quiz-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <b id="qNumber" style="color:var(--a)">Questão 1 de 5</b>
+      <span id="qScore" style="color:var(--y);font-weight:bold">Pontos: 0</span>
+    </div>
+    <h4 id="qText" style="margin:0 0 16px;font-size:1.05rem;line-height:1.5"></h4>
+    <div id="qOptions"></div>
+    <div id="qFeedback" class="quiz-feedback hidden"></div>
+    <button id="qNext" class="hidden" style="margin-top:14px">Próxima Questão ➡️</button>
+  </div>
+</div>
+
+<div class="card hidden" id="endCard">
+  <h2>🎉 Parabéns! Você dominou Context Pruning & Prompt Caching!</h2>
+  <p>Essa é uma das habilidades mais valorizadas e raras do mercado de IA atual:</p>
+  <ul>
+    <li>✅ <b>Prompt Caching:</b> Sabe estruturar prompts para atingir até 90% de economia e reduzir a latência de 6s para 0.5s.</li>
+    <li>✅ <b>Integridade de Prefixo:</b> Entende que o conteúdo estático (manuais, RAG fixo) deve ficar no topo e as variáveis (tempo, pergunta) no final.</li>
+    <li>✅ <b>Context Pruning:</b> Sabe podar saídas pesadas de ferramentas e conversas antigas para evitar o problema *Lost in the Middle*.</li>
+    <li>✅ <b>Sintaxe de Produção:</b> Pronto para aplicar o header de cache na API do Claude, OpenAI ou Gemini na sua empresa!</li>
+  </ul>
+  
+  <div class="nav-footer">
+    <a href="aula09-blueprint-de-monetizacao.html" style="color:var(--a);text-decoration:none;font-weight:600">⬅️ Voltar para Aula 9: Monetização</a>
+    <span style="font-weight:bold;color:var(--ok)">Arsenal Completo de IA de Produção! 🚀</span>
+  </div>
+</div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+let xp=0, done={};
+
+function gain(n,m){
+  xp+=n;
+  $('xp').style.width=Math.min(100,xp/210*100)+'%';
+  $('xpt').textContent=xp+' XP';
+  $('lvl').textContent='Nível '+(1+Math.floor(xp/60));
+  const t=$('toast');t.textContent=m+'  +'+n+' XP';t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+function complete(id,n,m,next){
+  if(done[id])return;done[id]=1;$(id).classList.add('done');gain(n,m);
+  if(next){$(next).classList.remove('hidden');setTimeout(()=>$(next).scrollIntoView({behavior:'smooth',block:'center'}),450);}
+}
+
+/* ===== MISSÃO 1: Caching Simulator ===== */
+$('btnRunNoCache').onclick=()=>{
+  $('gCost').textContent='$ 180.00';
+  $('gCost').style.color='var(--err)';
+  $('gTime').textContent='5.8s';
+  $('gTime').style.color='var(--err)';
+  $('gHit').textContent='0%';
+  $('gHit').style.color='#94a3b8';
+  $('cacheDesc').innerHTML='❌ <b>Sem Caching:</b> A GPU precisou reprocessar todos os 60.000 tokens a cada requisição. Custo integral de entrada + lentidão que irrita os usuários.';
+};
+$('btnRunCache').onclick=()=>{
+  $('gCost').textContent='$ 21.60';
+  $('gCost').style.color='var(--ok)';
+  $('gTime').textContent='0.6s';
+  $('gTime').style.color='var(--ok)';
+  $('gHit').textContent='98.2%';
+  $('gHit').style.color='var(--ok)';
+  $('cacheDesc').innerHTML='⚡ <b>Com Prompt Caching:</b> 88% de economia financeira direta e a resposta chega em 600 milissegundos porque a GPU reutilizou o KV Cache da memória!';
+  complete('m1',35,'Comprovou a economia do Prompt Caching!','m2');
+};
+
+/* ===== MISSÃO 2: Prefixo e Invalidação ===== */
+$('btnGoodArch').onclick=()=>{
+  $('p1').style.opacity='1';
+  $('p2').style.opacity='1';
+  $('p1').innerHTML='[BLOCO 1 - ESTÁTICO / CACHEADO]: System Prompt + 4 Manuais da Empresa (55.000 tokens) 🔒 <b style="color:var(--ok)">CACHE HIT</b>';
+  $('archTip').style.borderLeftColor='var(--ok)';
+  $('archTip').innerHTML='✅ <b>Perfeito!</b> Como os blocos 1 e 2 são 100% idênticos em todas as requisições, o cache é aproveitado continuamente. Apenas a pergunta (Bloco 3) é processada como token novo.';
+  complete('m2',40,'Entendeu a hierarquia de prefixo estático!','m3');
+};
+$('btnBadArch').onclick=()=>{
+  $('p1').innerHTML='[ERRO]: "Hoje é 28/10/2026 15:42:19. System Prompt + Manuais..." <b style="color:var(--err)">CACHE MISS TOTAL!</b>';
+  $('archTip').style.borderLeftColor='var(--err)';
+  $('archTip').innerHTML='💥 <b>DESASTRE DE ENGENHARIA:</b> Colocar a data/hora ou o ID da sessão no topo do prompt altera o primeiro caractere da mensagem. Isso <b>invalida o cache inteiro dos 65.000 tokens</b> e faz sua empresa pagar preço cheio em todas as chamadas!';
+};
+
+/* ===== MISSÃO 3: Context Pruning ===== */
+document.querySelectorAll('.prune-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    const lvl=btn.dataset.lvl;
+    const items=document.querySelectorAll('.ctx-item');
+    if(lvl==='none'){
+      items.forEach(i=>i.classList.remove('pruned'));
+      $('gTokens').textContent='19.350';
+      $('gSavings').textContent='Sem economia';
+      $('gTokens').style.color='var(--err)';
+    }else if(lvl==='tools'){
+      items.forEach(i=>{
+        if(i.dataset.type==='tool') i.classList.add('pruned');
+        else i.classList.remove('pruned');
+      });
+      $('gTokens').textContent='950';
+      $('gSavings').textContent='Corte de 95% do peso!';
+      $('gTokens').style.color='var(--ok)';
+    }else if(lvl==='full'){
+      items.forEach(i=>{
+        if(i.dataset.type==='tool'||i.dataset.type==='greet') i.classList.add('pruned');
+      });
+      $('gTokens').textContent='923';
+      $('gSavings').textContent='Apenas contexto essencial!';
+      $('gTokens').style.color='var(--ok)';
+      complete('m3',45,'Mestre do Context Pruning Corporativo!','m4');
+    }
+  };
+});
+
+/* ===== MISSÃO 4: Código Real ===== */
+$('btnCopyCode').onclick=()=>{
+  complete('m4',40,'Sintaxe real assimilada!','m5');
+  startQuiz();
+};
+
+/* ===== MISSÃO 5: QUIZ CORPORATIVO ===== */
+const quizQuestions=[
+  {
+    q: "1. Sua equipe está integrando um chatbot com Claude 3.5 e percebeu que a fatura não teve nenhum desconto de cache, mesmo enviando o mesmo PDF de 50 páginas. Qual o motivo mais provável?",
+    options: [
+      {t: "O desenvolvedor inseriu o timestamp dinâmico ('Data/Hora atual: ...') logo na primeira linha do System Prompt, mudando o prefixo a cada segundo e invalidando o cache.", correct: true, f: "Exato! Caching exige correspondência de bytes idêntica do início até o ponto de cache. Se o topo muda, o cache quebra."},
+      {t: "Porque PDFs não podem ser lidos por Inteligência Artificial.", correct: false, f: "LLMs modernos processam PDFs via texto ou visão perfeitamente."},
+      {t: "Porque o modelo Claude só aceita perguntas em latim.", correct: false, f: "Totalmente incorreto."},
+      {t: "Porque prompt caching só funciona nos fins de semana.", correct: false, f: "O cache funciona 24 horas por dia."}
+    ]
+  },
+  {
+    q: "2. O que é o fenômeno 'Lost in the Middle' e como o Context Pruning ajuda a resolvê-lo?",
+    options: [
+      {t: "É quando a internet cai no meio da requisição.", correct: false, f: "Isso é falha de conexão de rede."},
+      {t: "É a tendência comprovada de LLMs prestarem mais atenção ao início e ao fim de prompts longos, ignorando dados cruciais no meio. Podar trechos irrelevantes traz os dados essenciais para o foco do modelo.", correct: true, f: "Gabarito perfeito! Context Pruning não é só sobre economizar dinheiro, mas sobre aumentar a precisão cognitiva do modelo."},
+      {t: "É quando o modelo esquece a própria senha de acesso.", correct: false, f: "Modelos não utilizam senhas."},
+      {t: "É um erro que só acontece na linguagem Java.", correct: false, f: "É um viés de atenção inerente à arquitetura Transformer."}
+    ]
+  },
+  {
+    q: "3. Em um sistema com Agentes de IA que consultam bancos SQL e APIs de frete, o que deve ser feito com o JSON bruto retornado pelas ferramentas (Tool Outputs) nas rodadas seguintes?",
+    options: [
+      {t: "Reenviar o JSON de 1.000 linhas repetidamente em todas as 20 mensagens futuras da conversa.", correct: false, f: "Isso desperdiça tokens massivamente e polui a janela de contexto."},
+      {t: "Aplicar Context Pruning: manter apenas o dado extraído relevante (ex: 'Frete: R$ 42,00') e descartar ou comprimir o payload bruto anterior antes das próximas chamadas.", correct: true, f: "Nota 10! Uma vez que o agente tomou a decisão, o JSON bruto de 1.000 linhas virou lixo de contexto e deve ser podado."},
+      {t: "Apagar o banco de dados SQL da empresa.", correct: false, f: "Jamais delete infraestrutura de produção."},
+      {t: "Mudar a temperatura para 2.0.", correct: false, f: "Temperatura não resolve inchaço de contexto."}
+    ]
+  },
+  {
+    q: "4. Qual é a regra de ouro para a posição do conteúdo dinâmico (a pergunta do usuário ou parâmetros que mudam) ao desenhar um prompt com Prompt Caching?",
+    options: [
+      {t: "Colocar tudo que muda no FINAL do prompt, preservando todo o bloco estático no TOPO.", correct: true, f: "Corretíssimo! O prefixo estático longo permanece intocado e aproveita o cache de 90% de desconto."},
+      {t: "Espalhar variáveis aleatoriamente pelo meio de todos os parágrafos do contrato.", correct: false, f: "Isso quebraria o cache em múltiplos pontos."},
+      {t: "Colocar as variáveis sempre no início do prompt.", correct: false, f: "Isso invalidaria todo o conteúdo que vem depois."},
+      {t: "Não permitir que o usuário faça perguntas.", correct: false, f: "O sistema precisa responder ao usuário."}
+    ]
+  },
+  {
+    q: "5. Em um atendimento ao cliente de 30 turnos, qual é a melhor arquitetura combinando Caching + Pruning?",
+    options: [
+      {t: "Cachear a base estática (Políticas da empresa / System Prompt) no topo e aplicar Pruning/Sumarização nas mensagens antigas da conversa conforme o chat se estende.", correct: true, f: "Arquitetura de nível Sênior! Você tem a velocidade e custo mínimo do cache no topo, sem sofrer com o inchaço e a distração da conversa longa embaixo."},
+      {t: "Desligar o chat a cada 2 mensagens para forçar o cliente a recomeçar.", correct: false, f: "Péssima experiência para o usuário."},
+      {t: "Enviar o histórico sem formatação 5 vezes seguidas.", correct: false, f: "Isso multiplica o custo por 5 sem nenhum ganho."},
+      {t: "Treinar um modelo novo do zero a cada mensagem.", correct: false, f: "Custo astronômico e tecnicamente inviável."}
+    ]
+  }
+];
+
+let curQ=0, score=0;
+
+function startQuiz(){
+  curQ=0; score=0;
+  $('qScore').textContent='Pontos: 0';
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=quizQuestions[curQ];
+  $('qNumber').textContent=`Questão ${curQ+1} de ${quizQuestions.length}`;
+  $('qText').textContent=q.q;
+  $('qFeedback').classList.add('hidden');
+  $('qNext').classList.add('hidden');
+  
+  const container=$('qOptions');
+  container.innerHTML='';
+  
+  q.options.forEach((opt)=>{
+    const btn=document.createElement('button');
+    btn.className='quiz-option';
+    btn.textContent=opt.t;
+    btn.onclick=()=>selectAnswer(btn, opt);
+    container.appendChild(btn);
+  });
+}
+
+function selectAnswer(selectedBtn, opt){
+  const allBtns=document.querySelectorAll('.quiz-option');
+  allBtns.forEach(b=>b.disabled=true);
+  
+  const fb=$('qFeedback');
+  fb.classList.remove('hidden');
+  
+  if(opt.correct){
+    selectedBtn.classList.add('correct');
+    fb.style.background='#143825';
+    fb.style.border='1px solid var(--ok)';
+    fb.style.color='#86efac';
+    fb.innerHTML='<b>✅ Decisão de Engenheiro Sênior:</b> '+opt.f;
+    score+=20;
+    $('qScore').textContent='Pontos: '+score;
+  } else {
+    selectedBtn.classList.add('incorrect');
+    fb.style.background='#38161c';
+    fb.style.border='1px solid var(--err)';
+    fb.style.color='#fca5a5';
+    fb.innerHTML='<b>❌ Armadilha Comum no Trabalho:</b> '+opt.f;
+    const q=quizQuestions[curQ];
+    const correctIdx=q.options.findIndex(x=>x.correct);
+    allBtns[correctIdx].classList.add('correct');
+  }
+  
+  $('qNext').classList.remove('hidden');
+}
+
+$('qNext').onclick=()=>{
+  curQ++;
+  if(curQ < quizQuestions.length){
+    renderQuestion();
+  } else {
+    complete('m5',60,'Especialista em Otimização de Custos de IA!','endCard');
+  }
+};
+</script>
+</body>
+</html>
